@@ -1,0 +1,65 @@
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package Instruccion;
+
+import Abstracto.Instruccion;
+import Errores.Error;
+import Simbolo.Arbol;
+import Simbolo.Simbolo;
+import Simbolo.TablaSimbolos;
+import Simbolo.Tipo;
+
+/**
+ *
+ * @author Lesther
+ */
+public class Declaracion extends Instruccion {
+    public String identificador;
+    public Instruccion valor;
+
+    public Declaracion(String identificador, Instruccion valor, Tipo tipo, int linea, int col) {
+        super(tipo, linea, col);
+        this.identificador = identificador;
+        this.valor = valor;
+    }
+    @Override
+    public Object interpretar(Arbol arbol, TablaSimbolos tabla){
+        
+        
+        Object valorInterpretado = null;
+
+        // Si la declaración trae asignación
+        if (this.valor != null) {
+            valorInterpretado = this.valor.interpretar(arbol, tabla);
+            if (valorInterpretado instanceof Error){
+                return valorInterpretado;
+            }
+
+            // Validación de tipo
+            if (this.valor.tipo.getTipo() != this.tipo.getTipo()){
+                return new Error("semantico",
+                        "Tipos erroneos en la declaración de '" + this.identificador + "'",
+                        this.linea, this.col);
+            }
+        }
+
+        else {
+            // valor por defecto según el tipo
+            switch(this.tipo.getTipo()){
+                case ENTERO: valorInterpretado = 0; break;
+                case DECIMAL: valorInterpretado = 0.0; break;
+                case BOOLEANO: valorInterpretado = false; break;
+                case CADENA: valorInterpretado = ""; break;
+                default: valorInterpretado = null; break;
+            }
+        }
+        Simbolo s = new Simbolo(this.tipo, this.identificador, valorInterpretado);
+        boolean creacion = tabla.setVariables(s);
+        if(!creacion){
+            return new Error("semantico", "Variable ya existente", this.linea, this.col);
+        }
+        return null;
+    }
+}

@@ -1,0 +1,189 @@
+package analisis;
+
+// Importaciones
+import java_cup.runtime.Symbol;
+import java.util.LinkedList;
+
+// Clases abstractas y símbolos
+import Abstracto.Instruccion;
+import Simbolo.Tipo;
+import Simbolo.Datos;
+import Simbolo.Simbolo;
+import Simbolo.TablaSimbolo;
+
+
+// Instrucciones
+import Instruccion.Print;
+import Instruccion.Declaracion;
+import Instruccion.Asignacion;
+import Instruccion.If;
+import Instruccion.While;
+import Instruccion.For;
+import Instruccion.Break;
+
+// Expresiones
+import Expresiones.Nativo;
+import Expresiones.Aritmeticas;
+import Expresiones.OperadoresAritmeticos;
+import Expresiones.Relacionales;
+import Expresiones.OperadoresRelacionales;
+import Expresiones.Logicas;
+import Expresiones.Casteo;
+
+parser code
+{:
+        scanner s;
+        parser(scanner s){this.s = s;};
+        public void syntax_error(Symbol s){
+            System.out.println("Error sintactico en la linea " + (s.left) + " y columna " + (s.right) + ". No se esperaba el siguiente componente: " + (s.value));
+        }
+        public void unrecovered_syntax_error(Symbol s){
+            System.out.println("Error sintactico no recuperable en la linea " + (s.left) + " y columna " + (s.right) + ". No se esperaba el siguiente componente: " + (s.value));
+        }
+:}
+
+// Terminales
+terminal VAR, INT, DOUBLE, BOOL, CHAR, STRING;
+terminal IF, ELSE;
+terminal WHILE, FOR, DO;
+terminal BREAK, CONTINUE;
+terminal PRINT;
+terminal String CADENA, ENTERO, DECIMAL;
+terminal char CARACTER; 
+terminal IDENTIFICADOR;
+terminal MAS, MENOS, MULT, DIV, POTENCIA, MODULO;
+terminal IGUAL, DIFERENTE, MENOR, MENOR_IGUAL, MAYOR, MAYOR_IGUAL;
+terminal AND, OR, NOT;
+terminal PAR_ABRIR, PAR_CERRAR;
+terminal LLAVE_ABRIR, LLAVE_CERRAR;
+terminal PUNTO_COMA, DOS_PUNTOS;
+
+// No terminales
+nonterminal LinkedList<Instruccion> INICIO, INSTRUCCIONES;
+nonterminal Instruccion INSTRUCCION;
+nonterminal Instruccion EXPRESION;
+nonterminal Tipos TIPO;
+nonterminal Instruccion DECLARACION, ASIGNACION;
+nonterminal Instruccion IF;
+nonterminal Instruccion ELSE;
+nonterminal Instruccion ELSEIF;
+nonterminal Instruccion WHILE;
+nonterminal Instruccion FOR;
+nonterminal Instruccion BREAK;
+
+// Precedencias (de menor a mayor prioridad)
+precedence left OR;
+precedence left AND;
+precedence left XOR;
+precedence right NOT;
+precedence left IGUAL, DIFERENTE, MENOR, MAYOR, MENOR_IGUAL, MAYOR_IGUAL;
+precedence left MAS, MENOS;
+precedence left MULT, DIV, MODULO;
+precedence nonassoc POTENCIA;
+precedence right UMENOS;
+
+start with INICIO;
+
+INICIO ::= INSTRUCCIONES:a   {: RESULT = a; :};
+
+INSTRUCCIONES ::= INSTRUCCIONES:a INSTRUCCION:b {: RESULT = a; a.add(b); :}
+                | INSTRUCCION:a {: RESULT = new LinkedList<>(); RESULT.add(a); :};
+
+// === INSTRUCCIONES ===
+INSTRUCCION ::= PRINT PAR_ABRIR EXPRESION:a PAR_CERRAR PUNTO_COMA {: RESULT = new Print(a, aleft, aright); :}
+              | DECLARACION:a PUNTO_COMA {: RESULT = a; :}
+              | ASIGNACION:a PUNTO_COMA {: RESULT = a; :}
+              | IF:a {: RESULT = a; :}
+              | WHILE:a {: RESULT = a; :}
+              | DO_WHILE:a {: RESULT = a; :}
+              | BREAK_INST:a {: RESULT = a; :}
+              | CONTINUE_INST:a {: RESULT = a; :};
+
+WHILE ::= WHILE PAR_ABRIR EXPRESION:a PAR_CERRAR LLAVE_ABRIR INSTRUCCIONES:b LLAVE_CERRAR
+        {: RESULT = new While(a, b, aleft, aright); :};
+
+DO_WHILE ::= DO LLAVE_ABRIR INSTRUCCIONES:a LLAVE_CERRAR PAR_ABRIR EXPRESION:b PAR_CERRAR PUNTO_COMA
+        {: RESULT = new Do_While(b, a, bleft, bright); :};
+
+// Sentencia IF soport tanto (Else y Else If)
+IF ::= IF PAR_ABRIR EXPRESION:a PAR_CERRAR LLAVE_ABRIR INSTRUCCIONES:b LLAVE_CERRAR
+        {: RESULT = new If(a, b, null, null, aleft, aright); :}
+        | IF PAR_ABRIR EXPRESION:a PAR_CERRAR LLAVE_ABRIR INSTRUCCIONES:b LLAVE_CERRAR ELSE LLAVE_ABRIR INSTRUCCIONES LLAVE_CERRAR
+        {: RESULT = new If(a, b, null, c, aleft, aright); :}
+        | IF PAR_ABRIR EXPRESION:a PAR_CERRAR LLAVE_ABRIR INSTRUCCIONES:b LLAVE_CERRAR ELSEIF:d
+        {: RESULT = new If(a, b, d, null, aleft, aright); :}
+        | IF PAR_ABRIR EXPRESION:a PAR_CERRAR LLAVE_ABRIR INSTRUCCIONES:b LLAVE_CERRAR ELSEIF:d ELSE LLAVE_ABRIR INSTRUCCIONES:e LLAVE_CERRAR
+        {: RESULT = new If(a, b, d, e, aleft, aright); :};
+
+ELSEIF ::= ELSEIF:a ELSE IF PAR_ABRIR EXPRESION:b PAR_CERRAR LLAVE_ABRIR INSTRUCCIONES:c LLAVE_CERRAR
+                 {: RESULT = a; a.add(new If(b, c, null, null, bleft, bright)); :}
+               | ELSE IF PAR_ABRIR EXPRESION:a PAR_CERRAR LLAVE_ABRIR INSTRUCCIONES:b LLAVE_CERRAR
+                 {: RESULT = new LinkedList<>(); RESULT.add(new If(a, b, null, null, aleft, aright)); :};
+
+BREAK ::= BREAK PUNTO_COMA {: RESULT new Break(aleft, aright); :};
+
+DECLARACION ::= VAR ID:a DOS_PUNTOS TIPO:b IGUAL EXPRESION:c
+            {: RESULT = new Declaracion(a, c, b, aleft, aright):}
+            | VAR ID:a DOS_PUNTOS TIPO:b 
+            {: RESULT  = new Declaracion(a, null, b, aleft, aright); :};
+
+ASIGNACION ::= ID:a IGUAL EXPRESION:b {: RESULT = new Asignacion(a, b, aleft, aright); :};
+
+TIPO ::= INT {: RESULT = new Tipo(Datos.ENTERO):}
+          | DOUBLE {: RESULT = new Tipo(Datos.DOUBLE):}
+          | STRING {: RESULT = new Tipo(Datos.STRING); :}
+          | BOOL {: RESULT = new Tipo(Datos.BOOL); :}
+          | CHAR {: RESULT = new Tipo(Datos.CHAR); :};
+
+
+// === EXPRESIONES ===
+EXPRESION ::= EXPRESION:a OR EXPRESION:b
+              {: RESULT = new Logicas(a, b, OperadoresLogicos.OR, aleft, aright); :}
+            | EXPRESION:a AND EXPRESION:b
+              {: RESULT = new Logicas(a, b, OperadoresLogicos.AND, aleft, aright); :}
+            | NOT EXPRESION:a
+              {: RESULT = new Logicas(null, a, OperadoresLogicos.NOT, aleft, aright); :}
+            | EXPRESION:a IGUAL EXPRESION:b
+              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.IGUAL, aleft, aright); :}
+            | EXPRESION:a DIFERENTE EXPRESION:b
+              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.DIFERENTE, aleft, aright); :}
+            | EXPRESION:a MENOR EXPRESION:b
+              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MENOR, aleft, aright); :}
+            | EXPRESION:a MAYOR EXPRESION:b
+              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MAYOR, aleft, aright); :}
+            | EXPRESION:a MENOR_IGUAL EXPRESION:b
+              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MENOR_IGUAL, aleft, aright); :}
+            | EXPRESION:a MAYOR_IGUAL EXPRESION:b
+              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MAYOR_IGUAL, aleft, aright); :}
+            | EXPRESION:a MAS EXPRESION:b
+              {: RESULT = new Aritmeticas(a, b, OperadoresAritmeticos.SUMA, aleft, aright); :}
+            | EXPRESION:a MENOS EXPRESION:b
+              {: RESULT = new Aritmeticas(a, b, OperadoresAritmeticos.RESTA, aleft, aright); :}
+            | EXPRESION:a MULT EXPRESION:b
+              {: RESULT = new Aritmeticas(a, b, OperadoresAritmeticos.MULTIPLICACION, aleft, aright); :}
+            | EXPRESION:a DIV EXPRESION:b
+              {: RESULT = new Aritmeticas(a, b, OperadoresAritmeticos.DIVISION, aleft, aright); :}
+            | EXPRESION:a MODULO EXPRESION:b
+              {: RESULT = new Aritmeticas(a, b, OperadoresAritmeticos.MODULO, aleft, aright); :}
+            | EXPRESION:a POTENCIA EXPRESION:b
+              {: RESULT = new Aritmeticas(a, b, OperadoresAritmeticos.POTENCIA, aleft, aright); :}
+            | MENOS EXPRESION:a %prec UMENOS
+              {: RESULT = new Aritmeticas(null, a, OperadoresAritmeticos.NEGACION, aleft, aright); :}
+            // Casteo:
+            | PAR_ABRIR TIPO:a PAR_CERRAR EXPRESION:b
+              {: RESULT = new Cast(a, b, aleft, aright); :}
+            | PAR_ABRIR EXPRESION:a PAR_CERRAR
+              {: RESULT = a; :}
+            | ENTERO:a
+              {: RESULT = new Nativo(Integer.valueOf(a), new Tipo(tipoDato.ENTERO), aleft, aright); :}
+            | DECIMAL:a
+              {: RESULT = new Nativo(Double.valueOf(a), new Tipo(tipoDato.DECIMAL), aleft, aright); :}
+            | CHAR:a
+              {: RESULT = new Nativo(a, new Tipo(tipoDato.CARACTER), aleft, aright); :}
+            | CADENA:a
+              {: RESULT = new Nativo(a, new Tipo(tipoDato.CADENA), aleft, aright); :}
+            | BOOLEANO:a
+              {: RESULT = new Nativo(a, new Tipo(tipoDato.BOOLEANO), aleft, aright); :}
+            | ID:a
+              {: RESULT = new AccesoVar(a, aleft, aright); :}
+            ;
