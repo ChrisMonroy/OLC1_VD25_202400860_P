@@ -14,6 +14,11 @@ import analisis.scanner;
 import analisis.parser;
 import Errores.Errores;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import Simbolo.Simbolo;
 
 /**
  *
@@ -97,53 +102,126 @@ public class Interprete extends javax.swing.JFrame {
         scanner s = new scanner(new BufferedReader(new StringReader(texto)));
         parser p = new parser(s);
 
-        // ✅ Primero: verificar errores LÉXICOS
+        // Paso 1: Análisis léxico
         if (!s.listaErrores.isEmpty()) {
-            StringBuilder sb = new StringBuilder("ERRORES LÉXICOS:\n");
-            for (Errores er : s.listaErrores) sb.append(er).append('\n');
-            jTextArea2.setText(sb.toString());
+            jTextArea2.setText(generarReporteErrores(s.listaErrores));
             return;
         }
 
-        // ✅ Segundo: parsear
+        // Paso 2: Análisis sintáctico
         var resultado = p.parse();
-
-        // ✅ Tercero: verificar errores SINTÁCTICOS
         if (!p.listaErrores.isEmpty()) {
-        StringBuilder sb = new StringBuilder("ERRORES SINTÁCTICOS:\n");
-            for (Object er : p.listaErrores) sb.append(er).append('\n');
-            jTextArea2.setText(sb.toString());
+            jTextArea2.setText(generarReporteErrores(p.listaErrores));
             return;
         }
 
-        // ✅ Cuarto: verificar tipo
+        // Paso 3: Validar si hay instrucciones
         if (!(resultado.value instanceof LinkedList)) {
-            jTextArea2.setText("ERROR INTERNO:\n" +
-                "El parser no devolvió una lista de instrucciones.\n" +
-                "Tipo recibido: " + resultado.value.getClass().getName());
+            jTextArea2.setText("ERROR INTERNO: El parser no devolvió una lista.");
             return;
         }
+        
         var ast = new Arbol((LinkedList<Instruccion>) resultado.value);
         var tabla = new TablaSimbolos();
         tabla.setNombre("GLOBAL");
         ast.setConsolas("");
 
+        // Lista para acumular errores semánticos
+        List<Errores> erroresSemantico = new ArrayList<>();
+
         for (var a : ast.getInstrucciones()) {
             Object res = a.interpretar(ast, tabla);
             if (res instanceof Errores) {
-                jTextArea2.setText("ERRORES EN TIEMPO DE EJECUCIÓN:\n" + res);
-                return;
+                erroresSemantico.add((Errores) res);
             }
         }
-        jTextArea2.setText(ast.getConsolas());
+
+        // Si hay errores semánticos, mostrarlos
+        if (!erroresSemantico.isEmpty()) {
+            jTextArea2.setText(generarReporteErrores(erroresSemantico));
+            return;
+        }
+        
+        // Paso 5: Generar reportes combinados
+        String salida = ast.getConsolas();
+        List<Simbolo> simbolos = obtenerTodosLosSimbolos(tabla);
+        String reporteSimbolos = generarReporteSimbolos(simbolos);
+
+        jTextArea2.setText(
+            "=== SALIDA ===\n" +
+            (salida.isEmpty() ? "(sin salida)\n" : salida + "\n") +
+            "\n=== TABLA DE SÍMBOLOS ===\n" +
+            reporteSimbolos
+        );
         
         } catch (Exception ex) {
         StringWriter sw = new StringWriter();
         ex.printStackTrace(new java.io.PrintWriter(sw));
         jTextArea2.setText("EXCEPCIÓN:\n" + sw);
+        
     }
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    // Método para generar el reporte de errores en formato tabular
+private String generarReporteErrores(List<Errores> errores) {
+    StringBuilder sb = new StringBuilder();
+    sb.append(String.format("%-4s %-12s %-50s %-6s %-7s%n", "#", "TIPO", "DESCRIPCIÓN", "LÍNEA", "COLUMNA"));
+    sb.append("----------------------------------------------------------------------------------\n");
+    for (int i = 0; i < errores.size(); i++) {
+        Errores e = errores.get(i);
+        sb.append(String.format("%-4d %-12s %-50s %-6d %-7d%n",
+            i + 1,
+            e.getTipo(),
+            e.getDesc(),
+            e.getLinea(),
+            e.getColumna()
+        ));
+    }
+    return sb.toString();
+}
+
+// Método para recolectar todos los símbolos (incluyendo ámbitos anidados)
+private List<Simbolo> obtenerTodosLosSimbolos(TablaSimbolos tabla) {
+    List<Simbolo> simbolos = new ArrayList<>();
+    Set<String> idsVistos = new HashSet<>(); // para evitar duplicados (mantiene el más local)
+
+    TablaSimbolos actual = tabla;
+    while (actual != null) {
+        // Recorremos de la tabla más local a la global
+        for (Simbolo s : actual.getTablaActual().values()) {
+            if (!idsVistos.contains(s.getId().toLowerCase())) {
+                simbolos.add(s);
+                idsVistos.add(s.getId().toLowerCase());
+            }
+        }
+        actual = actual.getTablaAnterior();
+    }
+    return simbolos;
+}
+
+// Método para generar el reporte de tabla de símbolos (Fase 1)
+private String generarReporteSimbolos(List<Simbolo> simbolos) {
+    StringBuilder sb = new StringBuilder();
+     sb.append(String.format("%-4s %-15s %-15s %-20s %-6s %-7s%n", "#", "ID", "TIPO", "VALOR", "LÍNEA", "COLUMNA"));
+    sb.append("------------------------------------------------------------------------\n");
+    for (int i = 0; i < simbolos.size(); i++) {
+        Simbolo s = simbolos.get(i);
+        String tipoStr = "desconocido";
+        if (s.getTipo() != null && s.getTipo().getTipo() != null) {
+            tipoStr = s.getTipo().getTipo().name(); // Ej: ENTERO, CADENA, etc.
+        }
+        String valorStr = (s.getValor() != null) ? s.getValor().toString() : "null";
+        sb.append(String.format("%-4d %-15s %-15s %-20s %-6d %-7d%n",
+            i + 1,
+            s.getId(),
+            tipoStr,
+            valorStr,
+            s.getLinea(),
+            s.getColumna()
+        ));
+    }
+    return sb.toString();
+}
     /**
      * @param args the command line arguments
      */

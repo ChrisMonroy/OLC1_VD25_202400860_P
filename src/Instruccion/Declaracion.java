@@ -55,7 +55,7 @@ public class Declaracion extends Instruccion {
                 default: valorInterpretado = null; break;
             }
         }
-        Simbolo s = new Simbolo(this.tipo, this.identificador, valorInterpretado);
+        Simbolo s = new Simbolo(this.tipo, this.identificador, valorInterpretado, this.linea, this.col);
         boolean creacion = tabla.setVariables(s);
         if(!creacion){
             return new Errores("semantico", "Variable ya existente", this.linea, this.col);

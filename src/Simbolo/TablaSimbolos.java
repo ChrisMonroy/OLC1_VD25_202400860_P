@@ -3,7 +3,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Simbolo;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  *
@@ -70,5 +72,16 @@ public class TablaSimbolos {
     }
     return null;
     
+}
+    
+    public List<Simbolo> obtenerTodosLosSimbolos() {
+    List<Simbolo> simbolos = new ArrayList<>(this.TablaActual.values());
+    
+    // Si hay tabla anterior (ámbitos anidados), incluye sus símbolos
+    if (this.TablaAnterior != null) {
+        simbolos.addAll(this.TablaAnterior.obtenerTodosLosSimbolos());
+    }
+    
+    return simbolos;
 }
 }
