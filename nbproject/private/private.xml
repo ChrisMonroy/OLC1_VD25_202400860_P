@@ -5,6 +5,38 @@
         <group>
             <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/olc1_vd25_202400860/OLC1_VD25_202400860.java</file>
             <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Abstracto/Instruccion.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Errores/Errores.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/analisis/lexico.jflex</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/AccesoVar.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Switch.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/SwitchCaso.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/olc1_vd25_202400860/Interprete.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Incremento.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/analisis/sintactico.cup</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/analisis/generator.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Simbolo/TablaSimbolos.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Simbolo/Tipo.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/Aritmetica.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/Casteo.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/Logicas.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/Nativo.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/OperadoresAritmeticos.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/OperadoresLogicos.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/OperadoresRelacionales.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/Relacionales.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Asignacion.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Break.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Continue.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Declaracion.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Do_While.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/For.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/If.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Print.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/While.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Simbolo/Arbol.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Simbolo/Datos.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Simbolo/Simbolo.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/analisis/scanner.java</file>
         </group>
     </open-files>
 </project-private>

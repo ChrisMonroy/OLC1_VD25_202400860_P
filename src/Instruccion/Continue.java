@@ -14,7 +14,7 @@ import Simbolo.TablaSimbolos;
  */
 public class Continue extends Instruccion{
 
-    public Continue(Tipo tipo, int linea, int col) {
+    public Continue(int linea, int col) {
         super(new Tipo(Datos.VOID), linea, col);
     }
     

@@ -2,7 +2,7 @@ package Expresiones;
 
 import Abstracto.Instruccion;
 import Simbolo.*;
-import Errores.Error;
+import Errores.Errores;
 import static Expresiones.OperadoresAritmeticos.*;
 
 /**
@@ -37,16 +37,16 @@ public class Aritmetica extends Instruccion {
 
         if (this.operandoUnico != null) {
             operadorUni = this.operandoUnico.interpretar(arbol, tabla);
-            if (operadorUni instanceof Error) {
+            if (operadorUni instanceof Errores) {
                 return operadorUni;
             }
         } else {
             operadorIz = this.operando1.interpretar(arbol, tabla);
-            if (operadorIz instanceof Error) {
+            if (operadorIz instanceof Errores) {
                 return operadorIz;
             }
             operadorDer = this.operando2.interpretar(arbol, tabla);
-            if (operadorDer instanceof Error) {
+            if (operadorDer instanceof Errores) {
                 return operadorDer;
             }
         }
@@ -59,7 +59,7 @@ public class Aritmetica extends Instruccion {
             case MODULO -> this.mod(operadorIz, operadorDer);
             case POTENCIA -> this.pot(operadorIz, operadorDer);
             case NEGACION -> this.negacion(operadorUni);
-            default -> new Error("Error Sintactico", "operador inexistente", this.linea, this.col);
+            default -> new Errores("Error Sintactico", "operador inexistente", this.linea, this.col);
         };
     }
 
@@ -103,7 +103,7 @@ public class Aritmetica extends Instruccion {
                         return (int) op1 + (double) op2;
                     }
                     default -> {
-                        return new Error("ERROR semantico", "suma erronea", this.linea, this.col);
+                        return new Errores("ERROR semantico", "suma erronea", this.linea, this.col);
                     }
                 }
             }
@@ -118,12 +118,12 @@ public class Aritmetica extends Instruccion {
                         return (double) op1 + (double) op2;
                     }
                     default -> {
-                        return new Error("ERROR semantico", "suma erronea", this.linea, this.col);
+                        return new Errores("ERROR semantico", "suma erronea", this.linea, this.col);
                     }
                 }
             }
             default -> {
-                return new Error("ERROR semantico", "suma erronea", this.linea, this.col);
+                return new Errores("ERROR semantico", "suma erronea", this.linea, this.col);
             }
         }
     }
@@ -140,7 +140,7 @@ public class Aritmetica extends Instruccion {
                 return (double) op1 * -1;
             }
             default -> {
-                return new Error("ERROR semantico", "negacion erronea", this.linea, this.col);
+                return new Errores("ERROR semantico", "negacion erronea", this.linea, this.col);
             }
         }
     }
@@ -151,12 +151,12 @@ public class Aritmetica extends Instruccion {
 
         // No se permite operar con cadenas
         if (tipo1 == Datos.CADENA || tipo2 == Datos.CADENA) {
-            return new Error("ERROR semantico", "resta con cadena no permitida", this.linea, this.col);
+            return new Errores("ERROR semantico", "resta con cadena no permitida", this.linea, this.col);
         }
 
         // Única combinación inválida con carácter: Carácter - Carácter
         if (tipo1 == Datos.CARACTER && tipo2 == Datos.CARACTER) {
-            return new Error("ERROR semantico", "resta entre caracteres no permitida", this.linea, this.col);
+            return new Errores("ERROR semantico", "resta entre caracteres no permitida", this.linea, this.col);
         }
 
         // Convertir CARÁCTER a ENTERO si es necesario
@@ -172,7 +172,7 @@ public class Aritmetica extends Instruccion {
         // Asegurar tipos numéricos
         if ((tipo1 != Datos.ENTERO && tipo1 != Datos.DECIMAL) ||
             (tipo2 != Datos.ENTERO && tipo2 != Datos.DECIMAL)) {
-            return new Error("ERROR semantico", "tipo no válido para resta", this.linea, this.col);
+            return new Errores("ERROR semantico", "tipo no válido para resta", this.linea, this.col);
         }
 
         // Determinar tipo de retorno y operar
@@ -188,7 +188,7 @@ public class Aritmetica extends Instruccion {
                         return (int) op1 - (double) op2;
                     }
                     default -> {
-                        return new Error("ERROR semantico", "tipo no válido para resta", this.linea, this.col);
+                        return new Errores("ERROR semantico", "tipo no válido para resta", this.linea, this.col);
                     }
                 }
             }
@@ -203,12 +203,12 @@ public class Aritmetica extends Instruccion {
                         return (double) op1 - (double) op2;
                     }
                     default -> {
-                        return new Error("ERROR semantico", "tipo no válido para resta", this.linea, this.col);
+                        return new Errores("ERROR semantico", "tipo no válido para resta", this.linea, this.col);
                     }
                 }
             }
             default -> {
-                return new Error("ERROR semantico", "tipo no válido para resta", this.linea, this.col);
+                return new Errores("ERROR semantico", "tipo no válido para resta", this.linea, this.col);
             }
         }
     }
@@ -219,12 +219,12 @@ public class Aritmetica extends Instruccion {
 
         // No se permite operar con cadenas
         if (tipo1 == Datos.CADENA || tipo2 == Datos.CADENA) {
-            return new Error("ERROR semantico", "multiplicación con cadena no permitida", this.linea, this.col);
+            return new Errores("ERROR semantico", "multiplicación con cadena no permitida", this.linea, this.col);
         }
 
         // Única combinación inválida con carácter: Carácter * Carácter
         if (tipo1 == Datos.CARACTER && tipo2 == Datos.CARACTER) {
-            return new Error("ERROR semantico", "multiplicación entre caracteres no permitida", this.linea, this.col);
+            return new Errores("ERROR semantico", "multiplicación entre caracteres no permitida", this.linea, this.col);
         }
 
         // Convertir CARÁCTER a ENTERO si es necesario
@@ -240,7 +240,7 @@ public class Aritmetica extends Instruccion {
         // Asegurar tipos numéricos
         if ((tipo1 != Datos.ENTERO && tipo1 != Datos.DECIMAL) ||
             (tipo2 != Datos.ENTERO && tipo2 != Datos.DECIMAL)) {
-            return new Error("ERROR semantico", "tipo no válido para multiplicación", this.linea, this.col);
+            return new Errores("ERROR semantico", "tipo no válido para multiplicación", this.linea, this.col);
         }
 
         // Determinar tipo de retorno y operar
@@ -256,7 +256,7 @@ public class Aritmetica extends Instruccion {
                         return (int) op1 * (double) op2;
                     }
                     default -> {
-                        return new Error("ERROR semantico", "tipo no válido para multiplicación", this.linea, this.col);
+                        return new Errores("ERROR semantico", "tipo no válido para multiplicación", this.linea, this.col);
                     }
                 }
             }
@@ -271,12 +271,12 @@ public class Aritmetica extends Instruccion {
                         return (double) op1 * (double) op2;
                     }
                     default -> {
-                        return new Error("ERROR semantico", "tipo no válido para multiplicación", this.linea, this.col);
+                        return new Errores("ERROR semantico", "tipo no válido para multiplicación", this.linea, this.col);
                     }
                 }
             }
             default -> {
-                return new Error("ERROR semantico", "tipo no válido para multiplicación", this.linea, this.col);
+                return new Errores("ERROR semantico", "tipo no válido para multiplicación", this.linea, this.col);
             }
         }
     }
@@ -287,18 +287,18 @@ public class Aritmetica extends Instruccion {
 
         // No se permite operar con cadenas
         if (tipo1 == Datos.CADENA || tipo2 == Datos.CADENA) {
-            return new Error("ERROR semantico", "división con cadena no permitida", this.linea, this.col);
+            return new Errores("ERROR semantico", "división con cadena no permitida", this.linea, this.col);
         }
 
         // Única combinación inválida con carácter: Carácter / Carácter
         if (tipo1 == Datos.CARACTER && tipo2 == Datos.CARACTER) {
-            return new Error("ERROR semantico", "división entre caracteres no permitida", this.linea, this.col);
+            return new Errores("ERROR semantico", "división entre caracteres no permitida", this.linea, this.col);
         }
 
         // Verificar división por cero
         if ((tipo2 == Datos.ENTERO && (int) op2 == 0) ||
             (tipo2 == Datos.DECIMAL && (double) op2 == 0.0)) {
-            return new Error("ERROR semantico", "división por cero", this.linea, this.col);
+            return new Errores("ERROR semantico", "división por cero", this.linea, this.col);
         }
 
         // Convertir CARÁCTER a ENTERO si es necesario
@@ -314,7 +314,7 @@ public class Aritmetica extends Instruccion {
         // Asegurar tipos numéricos
         if ((tipo1 != Datos.ENTERO && tipo1 != Datos.DECIMAL) ||
             (tipo2 != Datos.ENTERO && tipo2 != Datos.DECIMAL)) {
-            return new Error("ERROR semantico", "tipo no válido para división", this.linea, this.col);
+            return new Errores("ERROR semantico", "tipo no válido para división", this.linea, this.col);
         }
 
         // Determinar tipo de retorno y operar
@@ -330,7 +330,7 @@ public class Aritmetica extends Instruccion {
                         return (int) op1 / (double) op2;
                     }
                     default -> {
-                        return new Error("ERROR semantico", "tipo no válido para división", this.linea, this.col);
+                        return new Errores("ERROR semantico", "tipo no válido para división", this.linea, this.col);
                     }
                 }
             }
@@ -345,12 +345,12 @@ public class Aritmetica extends Instruccion {
                         return (double) op1 / (double) op2;
                     }
                     default -> {
-                        return new Error("ERROR semantico", "tipo no válido para división", this.linea, this.col);
+                        return new Errores("ERROR semantico", "tipo no válido para división", this.linea, this.col);
                     }
                 }
             }
             default -> {
-                return new Error("ERROR semantico", "tipo no válido para división", this.linea, this.col);
+                return new Errores("ERROR semantico", "tipo no válido para división", this.linea, this.col);
             }
         }
     }
@@ -361,18 +361,18 @@ public class Aritmetica extends Instruccion {
 
         // No se permite operar con cadenas
         if (tipo1 == Datos.CADENA || tipo2 == Datos.CADENA) {
-            return new Error("ERROR semantico", "módulo con cadena no permitido", this.linea, this.col);
+            return new Errores("ERROR semantico", "módulo con cadena no permitido", this.linea, this.col);
         }
 
         // Única combinación inválida con carácter: Carácter % Carácter
         if (tipo1 == Datos.CARACTER && tipo2 == Datos.CARACTER) {
-            return new Error("ERROR semantico", "módulo entre caracteres no permitido", this.linea, this.col);
+            return new Errores("ERROR semantico", "módulo entre caracteres no permitido", this.linea, this.col);
         }
 
         // Verificar módulo por cero
         if ((tipo2 == Datos.ENTERO && (int) op2 == 0) ||
             (tipo2 == Datos.DECIMAL && (double) op2 == 0.0)) {
-            return new Error("ERROR semantico", "módulo por cero", this.linea, this.col);
+            return new Errores("ERROR semantico", "módulo por cero", this.linea, this.col);
         }
 
         // Convertir CARÁCTER a ENTERO si es necesario
@@ -388,7 +388,7 @@ public class Aritmetica extends Instruccion {
         // Asegurar tipos numéricos
         if ((tipo1 != Datos.ENTERO && tipo1 != Datos.DECIMAL) ||
             (tipo2 != Datos.ENTERO && tipo2 != Datos.DECIMAL)) {
-            return new Error("ERROR semantico", "tipo no válido para módulo", this.linea, this.col);
+            return new Errores("ERROR semantico", "tipo no válido para módulo", this.linea, this.col);
         }
 
         // Determinar tipo de retorno y operar
@@ -404,7 +404,7 @@ public class Aritmetica extends Instruccion {
                         return (int) op1 % (double) op2;
                     }
                     default -> {
-                        return new Error("ERROR semantico", "tipo no válido para módulo", this.linea, this.col);
+                        return new Errores("ERROR semantico", "tipo no válido para módulo", this.linea, this.col);
                     }
                 }
             }
@@ -419,12 +419,12 @@ public class Aritmetica extends Instruccion {
                         return (double) op1 % (double) op2;
                     }
                     default -> {
-                        return new Error("ERROR semantico", "tipo no válido para módulo", this.linea, this.col);
+                        return new Errores("ERROR semantico", "tipo no válido para módulo", this.linea, this.col);
                     }
                 }
             }
             default -> {
-                return new Error("ERROR semantico", "tipo no válido para módulo", this.linea, this.col);
+                return new Errores("ERROR semantico", "tipo no válido para módulo", this.linea, this.col);
             }
         }
     }
@@ -435,18 +435,18 @@ public class Aritmetica extends Instruccion {
 
         // El PDF no menciona CARÁCTER en potencia, así que lo prohibimos
         if (tipo1 == Datos.CARACTER || tipo2 == Datos.CARACTER) {
-            return new Error("ERROR semantico", "potencia con caracter no permitida", this.linea, this.col);
+            return new Errores("ERROR semantico", "potencia con caracter no permitida", this.linea, this.col);
         }
 
         // No se permite operar con cadenas
         if (tipo1 == Datos.CADENA || tipo2 == Datos.CADENA) {
-            return new Error("ERROR semantico", "potencia con cadena no permitida", this.linea, this.col);
+            return new Errores("ERROR semantico", "potencia con cadena no permitida", this.linea, this.col);
         }
 
         // Asegurar tipos numéricos
         if ((tipo1 != Datos.ENTERO && tipo1 != Datos.DECIMAL) ||
             (tipo2 != Datos.ENTERO && tipo2 != Datos.DECIMAL)) {
-            return new Error("ERROR semantico", "tipo no válido para potencia", this.linea, this.col);
+            return new Errores("ERROR semantico", "tipo no válido para potencia", this.linea, this.col);
         }
 
         // Convertir a double para usar Math.pow

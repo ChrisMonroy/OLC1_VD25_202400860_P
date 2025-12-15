@@ -5,7 +5,7 @@
 package Simbolo;
 import java.util.LinkedList;
 import Abstracto.Instruccion;
-import Errores.Error;
+import Errores.Errores;
 import Simbolo.TablaSimbolos;
 /**
  *
@@ -15,7 +15,7 @@ public class Arbol {
     
     private LinkedList<Instruccion> instrucciones;
     private TablaSimbolos tablaGlobal;
-    public LinkedList<Error> errores;
+    public LinkedList<Errores> errores;
     private String consolas;
 
     public Arbol(LinkedList<Instruccion> instrucciones) {
@@ -41,11 +41,11 @@ public class Arbol {
         this.tablaGlobal = tablaGlobal;
     }
 
-    public LinkedList<Error> getErrores() {
+    public LinkedList<Errores> getErrores() {
         return errores;
     }
 
-    public void setErrores(LinkedList<Error> errores) {
+    public void setErrores(LinkedList<Errores> errores) {
         this.errores = errores;
     }
 

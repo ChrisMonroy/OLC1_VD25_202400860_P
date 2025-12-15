@@ -6,7 +6,7 @@ package Expresiones;
 
 import Abstracto.Instruccion;
 import Simbolo.*;
-import Errores.Error;
+import Errores.Errores;
 
 /**
  * Clase para manejar expresiones de casteo según el PDF de JavaUSAC (Fase 1).
@@ -26,7 +26,7 @@ public class Casteo extends Instruccion {
     @Override
     public Object interpretar(Arbol arbol, TablaSimbolos tabla) {
         Object valor = this.expresion.interpretar(arbol, tabla);
-        if (valor instanceof Error) {
+        if (valor instanceof Errores) {
             return valor;
         }
 
@@ -58,7 +58,7 @@ public class Casteo extends Instruccion {
         }
 
         // Si no coincide ninguna regla válida → error semántico
-        return new Error("SEMANTICO", 
+        return new Errores("SEMANTICO", 
             "Casteo no válido: de " + tipoOrigen + " a " + tipoDestino, 
             this.linea, this.col);
     }

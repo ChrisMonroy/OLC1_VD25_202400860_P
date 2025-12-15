@@ -3,7 +3,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Main.java to edit this template
  */
 package olc1_vd25_202400860;
-
+import olc1_vd25_202400860.Interprete;
 /**
  *
  * @author Christoper
@@ -15,6 +15,8 @@ public class OLC1_VD25_202400860 {
      */
     public static void main(String[] args) {
         // TODO code application logic here
+        Interprete in = new Interprete();
+        in.setVisible(true);
     }
     
 }

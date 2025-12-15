@@ -58,12 +58,17 @@ public class TablaSimbolos {
         return false;
     }
     
-    public Simbolo getVariable(String id){
-        Simbolo busqueda = (Simbolo) this.TablaActual.get(id.toLowerCase());
-        if (busqueda != null){
-           
-            return busqueda;
-        }
-        return null;
+    public Simbolo getVariable(String id) {
+    String key = id.toLowerCase();
+    Simbolo simbolo = this.TablaActual.get(key);
+    if (simbolo != null) {
+        return simbolo;
     }
+    // Si no está aquí, buscar en el entorno padre
+    if (this.TablaAnterior != null) {
+        return this.TablaAnterior.getVariable(id);
+    }
+    return null;
+    
+}
 }

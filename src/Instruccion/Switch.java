@@ -9,7 +9,7 @@ import Simbolo.Datos;
 import Simbolo.TablaSimbolos;
 import Simbolo.Tipo;
 import java.util.LinkedList;
-import Errores.Error;
+import Errores.Errores;
 
 /**
  *
@@ -40,7 +40,7 @@ public class Switch extends Instruccion{
     
     public Object interpretar(Arbol arbol, TablaSimbolos tabla){
         Object valorSwitch = this.expresion.interpretar(arbol, tabla);
-        if (valorSwitch instanceof Error) {
+        if (valorSwitch instanceof Errores) {
             return valorSwitch;
         }
         TablaSimbolos tablaLocal = new TablaSimbolos(tabla);
@@ -53,14 +53,14 @@ public class Switch extends Instruccion{
             LinkedList<Instruccion> instrsCaso = this.instruccionesCasos.get(i);
 
             Object valorCaso = exprCaso.interpretar(arbol, tabla);
-            if (valorCaso instanceof Error) {
+            if (valorCaso instanceof Errores) {
                 return valorCaso;
             }
 
             if (ejecutando) {
                 for (Instruccion inst : instrsCaso) {
                     Object res = inst.interpretar(arbol, tablaLocal);
-                    if (res instanceof Error) return res;
+                    if (res instanceof Errores) return res;
                     if (res instanceof Break) return null;
                 }
             }
@@ -69,7 +69,7 @@ public class Switch extends Instruccion{
                 ejecutando = true;
                 for (Instruccion inst : instrsCaso) {
                     Object res = inst.interpretar(arbol, tablaLocal);
-                    if (res instanceof Error) return res;
+                    if (res instanceof Errores) return res;
                     if (res instanceof Break) return null;
                 }
             }
@@ -78,7 +78,7 @@ public class Switch extends Instruccion{
         if (!encontrado && this.instruccionesDefault != null) {
             for (Instruccion inst : this.instruccionesDefault) {
                 Object res = inst.interpretar(arbol, tablaLocal);
-                if (res instanceof Error) return res;
+                if (res instanceof Errores) return res;
                 if (res instanceof Break) return null;
             }
         }
@@ -91,4 +91,21 @@ public class Switch extends Instruccion{
         if (a.getClass() != b.getClass()) return false;
         return a.equals(b);
     }
+    
+    public static LinkedList<Instruccion> extraerValores(LinkedList<SwitchCaso> casos) {
+    LinkedList<Instruccion> valores = new LinkedList<>();
+    for (SwitchCaso c : casos) {
+        valores.add(c.getExpresion());
+    }
+    return valores;
+}
+
+public static LinkedList<LinkedList<Instruccion>> extraerInstrucciones(LinkedList<SwitchCaso> casos) {
+    LinkedList<LinkedList<Instruccion>> instrs = new LinkedList<>();
+    for (SwitchCaso c : casos) {
+        instrs.add(c.getInstrucciones());
+    }
+    return instrs;
+}
+
 }

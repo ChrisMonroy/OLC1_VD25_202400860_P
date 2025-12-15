@@ -5,8 +5,8 @@
 package Expresiones;
 
 import Abstracto.Instruccion;
+import Errores.Errores;
 import Simbolo.*;
-import Errores.Error;
 
 /**
  *
@@ -29,8 +29,14 @@ public class Logicas extends Instruccion {
     // Constructor binario (AND, OR, XOR)
     public Logicas(Instruccion opIzq, Instruccion opDer, OperadoresLogicos operador, int linea, int col) {
         super(new Tipo(Datos.BOOLEANO), linea, col);
-        this.opIzq = opIzq;
-        this.opDer = opDer;
+        // El parser puede construir el nodo pasando null en el primer argumento
+        // para representar el operador unario (NOT). Manejar ambos casos aquí.
+        if (opIzq == null) {
+            this.opUnario = opDer;
+        } else {
+            this.opIzq = opIzq;
+            this.opDer = opDer;
+        }
         this.operador = operador;
     }
 
@@ -38,18 +44,18 @@ public class Logicas extends Instruccion {
     public Object interpretar(Arbol arbol, TablaSimbolos tabla) {
         if (this.operador == OperadoresLogicos.NOT) {
             Object valor = this.opUnario.interpretar(arbol, tabla);
-            if (valor instanceof Error) return valor;
+            if (valor instanceof Errores) return valor;
             return this.not(valor);
         } else {
             Object izq = this.opIzq.interpretar(arbol, tabla);
-            if (izq instanceof Error) return izq;
+            if (izq instanceof Errores) return izq;
             Object der = this.opDer.interpretar(arbol, tabla);
-            if (der instanceof Error) return der;
+            if (der instanceof Errores) return der;
             return switch (this.operador) {
                 case AND -> this.and(izq, der);
                 case OR -> this.or(izq, der);
                 case XOR -> this.xor(izq, der);
-                default -> new Error("SEMANTICO", "Operador lógico inválido", this.linea, this.col);
+                default -> new Errores("SEMANTICO", "Operador lógico inválido", this.linea, this.col);
             };
         }
     }
@@ -57,14 +63,14 @@ public class Logicas extends Instruccion {
     private Object not(Object valor) {
         var tipo = this.opUnario.tipo.getTipo();
         if (tipo != Datos.BOOLEANO) {
-            return new Error("SEMANTICO", "El operador NOT solo se puede aplicar a booleanos", this.linea, this.col);
+            return new Errores("SEMANTICO", "El operador NOT solo se puede aplicar a booleanos", this.linea, this.col);
         }
         return !(Boolean) valor;
     }
 
     private Object validarBooleano(Object val, Datos tipo) {
         if (tipo != Datos.BOOLEANO) {
-            return new Error("SEMANTICO", "Operador lógico requiere operandos booleanos", this.linea, this.col);
+            return new Errores("SEMANTICO", "Operador lógico requiere operandos booleanos", this.linea, this.col);
         }
         return null;
     }

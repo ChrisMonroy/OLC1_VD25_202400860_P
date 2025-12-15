@@ -9,7 +9,7 @@ import Simbolo.Arbol;
 import Simbolo.Datos;
 import Simbolo.Tipo;
 import Simbolo.TablaSimbolos;
-import Errores.Error;
+import Errores.Errores;
 /**
  *
  * @author Christoper
@@ -24,36 +24,38 @@ public class While extends Instruccion {
         this.instrucciones = instrucciones;
     }
     @Override 
-    public Object interpretar(Arbol arbol, TablaSimbolos tabla){
-        // se crear una tabla para el while
-               // se ejecuta condicion inicial del while
-        Object condicion = this.expresion.interpretar(arbol, tabla);
-        // validamos que la condicion no tenga errores
-        if (condicion instanceof Error){
-            return condicion;
-        } 
-        // se ejecutan instrucciones mientras condicion sea verdadero
-        while ((boolean)condicion){
-            TablaSimbolos tablaWhile = new TablaSimbolos(tabla);
+public Object interpretar(Arbol arbol, TablaSimbolos tabla){
+    // Evaluar la condición SIEMPRE en el entorno actual (externo)
+    Object condicion = this.expresion.interpretar(arbol, tabla);
+    if (condicion instanceof Errores) {
+        return condicion;
+    }
+    
+    if (!(condicion instanceof Boolean)) {
+        return new Errores("Semantico", "La condicion del while tiene que devolver un valor booleano", this.linea, this.col);
+    }
 
-            for (var ins: instrucciones){
-                Object resultado = ins.interpretar(arbol, tablaWhile);
-                // validamos que la instruccion no traiga un errore
-                if (resultado instanceof Error){
-                    return resultado;
-                } 
-            }
-            // se ejecuta condicion nuevamente despues del bloque de instrucciones
-            condicion = this.expresion.interpretar(arbol, tablaWhile);
-            // validamos que la condicion no tenga errores
-            if (condicion instanceof Error){
-                return condicion;
-            } 
-            // verificar que condicion sea un booleano despues del bloque de instrucciones
-            if(!(condicion instanceof Boolean)){
-                return new Error("Semantico", "La condicion del while tiene que devolver un valor booleano", this.linea, this.col);
+    while ((boolean) condicion) {
+        // Crear entorno nuevo SOLO para el cuerpo
+        TablaSimbolos tablaWhile = new TablaSimbolos(tabla);
+
+        for (var ins : instrucciones) {
+            Object resultado = ins.interpretar(arbol, tablaWhile);
+            if (resultado instanceof Errores) {
+                return resultado;
             }
         }
-        return null;
+
+        // Re-evaluar la condición en el ENTORNO EXTERNO (tabla), no en tablaWhile
+        condicion = this.expresion.interpretar(arbol, tabla);
+        if (condicion instanceof Errores) {
+            return condicion;
+        }
+
+        if (!(condicion instanceof Boolean)) {
+            return new Errores("Semantico", "La condicion del while tiene que devolver un valor booleano", this.linea, this.col);
+        }
     }
+    return null;
+}
 }

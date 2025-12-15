@@ -8,7 +8,7 @@ import Simbolo.TablaSimbolos;
 import Simbolo.Datos;
 import Simbolo.Tipo;
 import Abstracto.Instruccion;
-import Errores.Error;
+import Errores.Errores;
 import java.util.LinkedList;
 /**
  *
@@ -33,18 +33,18 @@ public class For extends Instruccion{
         TablaSimbolos ambitoFor = new TablaSimbolos(tabla);
         
         Object resultadoAsignacion = this.asignacion.interpretar(arbol, tabla);
-        if (resultadoAsignacion instanceof Error){
+        if (resultadoAsignacion instanceof Errores){
             return resultadoAsignacion;
         }
         
         Object cond = this.condicion.interpretar(arbol, ambitoFor);
-        if (cond instanceof Error) {
+        if (cond instanceof Errores) {
             return cond;
         }
 
         // Validar que la condición sea booleana
         if (!(cond instanceof Boolean)) {
-            return new Error("Semantico", "La condición del for debe ser de tipo booleano.", this.linea, this.col);
+            return new Errores("Semantico", "La condición del for debe ser de tipo booleano.", this.linea, this.col);
         }
         
         while ((Boolean) cond){
@@ -53,7 +53,7 @@ public class For extends Instruccion{
             for (Instruccion ins: instrucciones){
                 Object resultado = ins.interpretar(arbol, ambitoCuerpo);
                 
-                if (resultado instanceof Error){
+                if (resultado instanceof Errores){
                     return resultado;
                 }
                 if (resultado instanceof Break){
@@ -64,17 +64,17 @@ public class For extends Instruccion{
                 }
             }
              Object resActualizacion = this.actualizacion.interpretar(arbol, ambitoFor);
-            if (resActualizacion instanceof Error) {
+            if (resActualizacion instanceof Errores) {
                 return resActualizacion;
                 
         }
             cond = this.condicion.interpretar(arbol, ambitoFor);
-            if (cond instanceof Error) {
+            if (cond instanceof Errores) {
                 return cond;
             }
 
             if (!(cond instanceof Boolean)) {
-                return new Error("Semantico", "La condición del for debe ser de tipo booleano.", this.linea, this.col);
+                return new Errores("Semantico", "La condición del for debe ser de tipo booleano.", this.linea, this.col);
             }
         }
         

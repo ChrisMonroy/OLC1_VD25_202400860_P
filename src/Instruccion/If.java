@@ -9,7 +9,7 @@ import Simbolo.Tipo;
 import java.util.LinkedList;
 import Simbolo.Datos;
 import Simbolo.TablaSimbolos;
-import Errores.Error;
+import Errores.Errores;
 /**
  *
  * @author Christoper
@@ -43,11 +43,11 @@ public class If extends Instruccion{
     
     public Object interpretar(Arbol arbol, TablaSimbolos tabla){
         var condicion = this.expresion.interpretar(arbol, tabla);
-        if (condicion instanceof Error){
+        if (condicion instanceof Errores){
             return condicion;
         }
         if (!(condicion instanceof Boolean)){
-            return new Error("Error semantico", "La condicion del if tiene que devolver un valor Booleano", this.linea, this.col);
+            return new Errores("Error semantico", "La condicion del if tiene que devolver un valor Booleano", this.linea, this.col);
         }
         boolean ejecutarIf = (Boolean) condicion;
         if(ejecutarIf){
@@ -56,7 +56,7 @@ public class If extends Instruccion{
             for (var inst: instrucciones){
                 var res = inst.interpretar(arbol, nuevaTabla);
                 
-                if (res instanceof Error){
+                if (res instanceof Errores){
                     return res;
                 }
             }
@@ -66,7 +66,7 @@ public class If extends Instruccion{
         if (instrucciones_elseif != null){
             for(Instruccion elseif: instrucciones_elseif){
                 var res = elseif.interpretar(arbol, tabla);
-                if (res instanceof Error){
+                if (res instanceof Errores){
                     return res;
                 }
                 if (res instanceof Boolean){
@@ -78,7 +78,7 @@ public class If extends Instruccion{
                 var nuevaTabla = new TablaSimbolos(tabla);
                 for (var instElse: instrucciones_else){
                     var res = instElse.interpretar(arbol, nuevaTabla);
-                    if (res instanceof Error){
+                    if (res instanceof Errores){
                         return res;
                     }
                 }
