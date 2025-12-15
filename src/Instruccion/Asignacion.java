@@ -8,7 +8,7 @@ import Simbolo.Tipo;
 import Simbolo.TablaSimbolos;
 import Simbolo.Datos;
 import Abstracto.Instruccion;
-import Errores.Error;
+import Errores.Errores;
 /**
  *
  * @author Christoper
@@ -26,14 +26,14 @@ public class Asignacion extends Instruccion{
     public Object interpretar(Arbol arbol, TablaSimbolos tabla){
         var variable = tabla.getVariable(id);
         if (variable == null){
-            return new Error("Semantico", "Variable no existente", this.linea, this.col);
+            return new Errores("Semantico", "Variable no existente", this.linea, this.col);
         }
         var newValor = this.valor.interpretar(arbol, tabla);
-        if (newValor instanceof Error){
+        if (newValor instanceof Errores){
             return newValor;
         }
         if(variable.getTipo().getTipo() != this.valor.tipo.getTipo()){
-            return new Error("Semantico", "Tipos Erroneos", this.linea, this.col);
+            return new Errores("Semantico", "Tipos Erroneos", this.linea, this.col);
         }
         variable.setValor(newValor);
         return null;
