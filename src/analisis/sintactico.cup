@@ -239,4 +239,8 @@ EXPRESION ::= EXPRESION:a OR EXPRESION:b
               {: RESULT = new Nativo(a, new Tipo(Datos.BOOLEANO), aleft, aright); :}
             | IDENTIFICADOR:a
               {: RESULT = new AccesoVar(a, aleft, aright); :}
+            | ROUND PAR_ABRIR EXPRESION:a PAR_CERRAR
+              {: RESULT = new Round(a, aleft, aright); :}
+            | TOSTRING PAR_ABRIR EXPRESION:a PAR_CERRAR
+              {: RESULT = new ToString(a, aleft, aright); :}
             ;
