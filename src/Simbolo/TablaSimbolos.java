@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class TablaSimbolos {
     private TablaSimbolos TablaAnterior;
-    private HashMap<String, Simbolo> TablaActual;
+    public HashMap<String, Simbolo> TablaActual;
     private String nombre;
     
     public TablaSimbolos(){
@@ -83,5 +83,30 @@ public class TablaSimbolos {
     }
     
     return simbolos;
+}
+
+public boolean agregar(Simbolo simbolo) {
+    if (simbolo == null || simbolo.getId() == null) {
+        return false;
+    }
+    String id = simbolo.getId().toLowerCase();
+    if (this.TablaActual.containsKey(id)) {
+        return false;
+    }
+    this.TablaActual.put(id, simbolo);
+    return true;
+}
+
+public Simbolo get(String id) {
+    // Buscar en la tabla actual
+    Simbolo simbolo = this.TablaActual.get(id.toLowerCase());
+    if (simbolo != null) {
+        return simbolo;
+    }
+    // Buscar en tablas anteriores (ámbitos superiores)
+    if (this.TablaAnterior != null) {
+        return this.TablaAnterior.get(id);
+    }
+    return null;
 }
 }

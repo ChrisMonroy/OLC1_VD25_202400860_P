@@ -30,5 +30,13 @@ public class AccesoVar extends Instruccion{
         this.tipo.setTipo(valor.getTipo().getTipo());
         return valor.getValor();
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
     
 }

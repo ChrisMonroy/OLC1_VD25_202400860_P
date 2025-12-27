@@ -36,10 +36,27 @@
             <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Simbolo/Arbol.java</file>
             <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Simbolo/Datos.java</file>
             <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Simbolo/Simbolo.java</file>
-            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/analisis/scanner.java</file>
-            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/analisis/parser.java</file>
             <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/Round.java</file>
             <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/ToString.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Metodo.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Start.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/AccesoVector.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/InicializadorVector.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Llamada.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Return.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/Funcion.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/AsignacionVector.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/analisis/scanner.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/AccesoVector2D.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/AsignacionVector2D.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/analisis/parser.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/DeclaracionLista.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/DeclaracionVector.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/Append.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/Remove.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/Length.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Expresiones/Find.java</file>
+            <file>file:/C:/Users/Christoper/Documents/NetBeansProjects/OLC1_VD25_202400860/src/Instruccion/ReturnValor.java</file>
         </group>
     </open-files>
 </project-private>

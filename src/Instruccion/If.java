@@ -3,18 +3,20 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package Instruccion;
+
 import Abstracto.Instruccion;
 import Simbolo.Arbol;
 import Simbolo.Tipo;
-import java.util.LinkedList;
 import Simbolo.Datos;
 import Simbolo.TablaSimbolos;
 import Errores.Errores;
+import java.util.LinkedList;
+
 /**
  *
  * @author Christoper
  */
-public class If extends Instruccion{
+public class If extends Instruccion {
     private Instruccion expresion;
     private LinkedList<Instruccion> instrucciones;
     private LinkedList<Instruccion> instrucciones_elseif;
@@ -41,49 +43,56 @@ public class If extends Instruccion{
         this.instrucciones_else = instrucciones_else;
     }
     
-    public Object interpretar(Arbol arbol, TablaSimbolos tabla){
-        var condicion = this.expresion.interpretar(arbol, tabla);
-        if (condicion instanceof Errores){
-            return condicion;
+    private Boolean convertirABooleano(Object valor, int linea, int col) {
+        if (valor instanceof Boolean) {
+            return (Boolean) valor;
         }
-        if (!(condicion instanceof Boolean)){
-            return new Errores("Error semantico", "La condicion del if tiene que devolver un valor Booleano", this.linea, this.col);
+        if (valor instanceof Integer) {
+            return (Integer) valor != -1;
         }
-        boolean ejecutarIf = (Boolean) condicion;
-        if(ejecutarIf){
-            var nuevaTabla = new TablaSimbolos(tabla);
-            
-            for (var inst: instrucciones){
-                var res = inst.interpretar(arbol, nuevaTabla);
-                
-                if (res instanceof Errores){
-                    return res;
-                }
-            }
-            return true;
+        if (valor instanceof Double) {
+            return (Double) valor != 0.0 && !((Double) valor).isNaN();
         }
-        
-        if (instrucciones_elseif != null){
-            for(Instruccion elseif: instrucciones_elseif){
-                var res = elseif.interpretar(arbol, tabla);
-                if (res instanceof Errores){
-                    return res;
-                }
-                if (res instanceof Boolean){
-                    return true;
-                }
-            }
+        if (valor instanceof String) {
+            return !((String) valor).isEmpty();
         }
-        if (instrucciones_else != null){
-                var nuevaTabla = new TablaSimbolos(tabla);
-                for (var instElse: instrucciones_else){
-                    var res = instElse.interpretar(arbol, nuevaTabla);
-                    if (res instanceof Errores){
-                        return res;
-                    }
-                }
-            }
-     return null;   
+        return false;
     }
-    
+
+    @Override
+    public Object interpretar(Arbol arbol, TablaSimbolos tabla) {
+        Object condicion = expresion.interpretar(arbol, tabla);
+        if (condicion instanceof Errores) return condicion;
+
+        Boolean condicionBooleana = convertirABooleano(condicion, this.linea, this.col);
+
+        if (condicionBooleana) {
+            TablaSimbolos nuevaTabla = new TablaSimbolos(tabla);
+            arbol.agregarTabla(nuevaTabla);
+
+            for (Instruccion inst : instrucciones) {
+                Object res = inst.interpretar(arbol, nuevaTabla);
+
+                if (res instanceof ReturnValor || res instanceof Errores) {
+                    return res;
+                }
+            }
+            return null;
+        }
+
+        if (instrucciones_else != null) {
+            TablaSimbolos nuevaTabla = new TablaSimbolos(tabla);
+            arbol.agregarTabla(nuevaTabla);
+
+            for (Instruccion inst : instrucciones_else) {
+                Object res = inst.interpretar(arbol, nuevaTabla);
+
+                if (res instanceof ReturnValor || res instanceof Errores) {
+                    return res;
+                }
+            }
+        }
+
+        return null;
+    }
 }

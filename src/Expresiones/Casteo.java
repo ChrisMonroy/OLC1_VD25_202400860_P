@@ -9,7 +9,8 @@ import Simbolo.*;
 import Errores.Errores;
 
 /**
- * Clase para manejar expresiones de casteo según el PDF de JavaUSAC (Fase 1).
+ *
+ * @author Christoper
  */
 public class Casteo extends Instruccion {
 

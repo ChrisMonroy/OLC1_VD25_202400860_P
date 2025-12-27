@@ -27,6 +27,11 @@ public class Simbolo {
         this.linea = linea;
         this.columna = columna;
     }
+    
+    
+    public Simbolo(String id, Tipo tipo, Object valor) {
+    this(tipo, id, valor, 0, 0); 
+}
 
     public Tipo getTipo() {
         return tipo;
@@ -66,6 +71,6 @@ public class Simbolo {
 
     public void setColumna(int columna) {
         this.columna = columna;
-    }
+    } 
     
 }

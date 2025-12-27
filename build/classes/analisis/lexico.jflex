@@ -38,8 +38,6 @@ BOOLEANO = true|false
 
 BLANCOS = [ \r\t\n\f]+
 COMENTARIO_LINEA = "//".*
-COMENTARIO_MULTILINEA_INICIO = "/\\*"
-COMENTARIO_MULTILINEA_FIN = "\\*/"
 
 %%
 
@@ -47,13 +45,16 @@ COMENTARIO_MULTILINEA_FIN = "\\*/"
 <YYINITIAL> {BLANCOS} { }
 
 // Comentarios
-<YYINITIAL> {COMENTARIO_LINEA} { }
-<YYINITIAL> {COMENTARIO_MULTILINEA_INICIO} { yybegin(COMENTARIO_MULTILINEA); }
+<YYINITIAL> "//".* { /* comentario de una línea */ }
 
-<COMENTARIO_MULTILINEA> {
-    {COMENTARIO_MULTILINEA_FIN} { yybegin(YYINITIAL); }
-    [^] { }
-}
+<YYINITIAL> "/*" { yybegin(COMENTARIO_MULTILINEA); }
+
+<COMENTARIO_MULTILINEA> "*/" { yybegin(YYINITIAL); }
+
+<COMENTARIO_MULTILINEA> \n   { yyline++; yycolumn = 1; }
+
+<COMENTARIO_MULTILINEA> .    { /* ignorar */ }
+
 
 // Palabras reservadas
 <YYINITIAL> "var"     { return new Symbol(sym.VAR, yyline, yycolumn, yytext()); }
@@ -70,14 +71,16 @@ COMENTARIO_MULTILINEA_FIN = "\\*/"
 <YYINITIAL> "default" { return new Symbol(sym.DEFAULT, yyline, yycolumn, yytext()); }
 <YYINITIAL> "return"  { return new Symbol(sym.RETURN, yyline, yycolumn, yytext()); }
 <YYINITIAL> "List"    { return new Symbol(sym.LIST, yyline, yycolumn, yytext()); }
+<YYINITIAL> "new"     { return new Symbol(sym.NEW, yyline, yycolumn, yytext()); }
 <YYINITIAL> "append"  { return new Symbol(sym.APPEND, yyline, yycolumn, yytext()); }
 <YYINITIAL> "remove"  { return new Symbol(sym.REMOVE, yyline, yycolumn, yytext()); }
 <YYINITIAL> "void"    { return new Symbol(sym.VOID, yyline, yycolumn, yytext()); }
 <YYINITIAL> "round"   { return new Symbol(sym.ROUND, yyline, yycolumn, yytext()); }
-<YYINITIAL> "lenght"  { return new Symbol(sym.LENGHT, yyline, yycolumn, yytext()); }
+<YYINITIAL> "length"  { return new Symbol(sym.LENGTH, yyline, yycolumn, yytext()); }
 <YYINITIAL> "toString" { return new Symbol(sym.TOSTRING, yyline, yycolumn, yytext()); }
-<YYINITIAL> "Find"    { return new Symbol(sym.FIND, yyline, yycolumn, yytext()); }
+<YYINITIAL> "find"    { return new Symbol(sym.FIND, yyline, yycolumn, yytext()); }
 <YYINITIAL> "start"   { return new Symbol(sym.START, yyline, yycolumn, yytext()); }
+
 
 
 // Tipos de dato
@@ -116,6 +119,11 @@ COMENTARIO_MULTILINEA_FIN = "\\*/"
 <YYINITIAL> "!"  { return new Symbol(sym.NOT, yyline, yycolumn, yytext()); }
 <YYINITIAL> "^"  { return new Symbol(sym.XOR, yyline, yycolumn, yytext()); }
 
+// Literales
+<YYINITIAL> {ENTERO}   { return new Symbol(sym.ENTERO, yyline, yycolumn, yytext()); }
+<YYINITIAL> {DECIMAL}  { return new Symbol(sym.DECIMAL, yyline, yycolumn, yytext()); }
+<YYINITIAL> {BOOLEANO} { return new Symbol(sym.BOOLEANO, yyline, yycolumn, yytext().equalsIgnoreCase("true")); }
+
 // Signos
 <YYINITIAL> "(" { return new Symbol(sym.PAR_ABRIR, yyline, yycolumn, yytext()); }
 <YYINITIAL> ")" { return new Symbol(sym.PAR_CERRAR, yyline, yycolumn, yytext()); }
@@ -125,12 +133,9 @@ COMENTARIO_MULTILINEA_FIN = "\\*/"
 <YYINITIAL> ":" { return new Symbol(sym.DOS_PUNTOS, yyline, yycolumn, yytext()); }
 <YYINITIAL> "[" { return new Symbol(sym.COR_ABRIR, yyline, yycolumn, yytext()); }
 <YYINITIAL> "]" { return new Symbol(sym.COR_CERRAR, yyline, yycolumn, yytext()); }
+<YYINITIAL> "," { return new Symbol(sym.COMA, yyline, yycolumn, yytext()); }
 <YYINITIAL> "." { return new Symbol(sym.PUNTO, yyline, yycolumn, yytext()); }
 
-// Literales
-<YYINITIAL> {ENTERO}   { return new Symbol(sym.ENTERO, yyline, yycolumn, yytext()); }
-<YYINITIAL> {DECIMAL}  { return new Symbol(sym.DECIMAL, yyline, yycolumn, yytext()); }
-<YYINITIAL> {BOOLEANO} { return new Symbol(sym.BOOLEANO, yyline, yycolumn, yytext().equalsIgnoreCase("true")); }
 
 // Cadenas
 <YYINITIAL> \" { cadena = ""; yybegin(CADENA); }

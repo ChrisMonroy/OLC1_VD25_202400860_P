@@ -7,6 +7,7 @@ import Simbolo.Tipo;
 import Simbolo.Arbol;
 import Abstracto.Instruccion;
 import Simbolo.TablaSimbolos;
+import Simbolo.Datos;
 /**
  *
  * @author Christoper
@@ -20,7 +21,21 @@ public class Nativo extends Instruccion{
         this.valor = valor;
     }
     @Override
-    public Object interpretar(Arbol arbol, TablaSimbolos tablasimbolos){
+    public Object interpretar(Arbol arbol, TablaSimbolos tabla){
+        if(this.tipo.getTipo() == Datos.CADENA){
+            String  texto =  valor.toString();
+            texto = texto.replace("\\n", "\n");
+            return texto;
+        }
         return this.valor;
     }
+
+    public Object getValor() {
+        return valor;
+    }
+
+    public void setValor(Object valor) {
+        this.valor = valor;
+    }
+    
 }

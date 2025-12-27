@@ -32,6 +32,7 @@ public class Do_While extends Instruccion {
         do {
             // Crear tabla de símbolos local para el ámbito del do-while
             TablaSimbolos tablaLocal = new TablaSimbolos(tabla);
+            arbol.agregarTabla(tablaLocal);
 
             // Ejecutar las instrucciones del cuerpo
             for (Instruccion ins : instrucciones) {

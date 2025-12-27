@@ -19,6 +19,23 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import Simbolo.Simbolo;
+import Instruccion.Metodo;
+import Instruccion.Start;
+import Instruccion.Declaracion;
+import Instruccion.Asignacion;
+import Instruccion.Funcion;
+import Instruccion.DeclaracionVector;
+import Expresiones.DeclaracionLista;
+import Instruccion.Llamada;
+import java.awt.Desktop;
+import java.awt.Image;
+import java.io.IOException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.InputStreamReader;
+import java.net.URL;
+import javax.swing.ImageIcon;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -146,70 +163,109 @@ public class Interprete extends javax.swing.JFrame {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
-        jTextArea2.setText("Interpretando...");
-    try {
-        String texto = jTextArea1.getText();
-        scanner s = new scanner(new BufferedReader(new StringReader(texto)));
-        parser p = new parser(s);
+         jTextArea2.setText("Interpretando...\n");
 
-        // Paso 1: Análisis léxico
-        if (!s.listaErrores.isEmpty()) {
-            jTextArea2.setText(generarReporteErrores(s.listaErrores));
-            return;
-        }
+        try {
+            String texto = jTextArea1.getText();
 
-        // Paso 2: Análisis sintáctico
-        var resultado = p.parse();
-        if (!p.listaErrores.isEmpty()) {
-            jTextArea2.setText(generarReporteErrores(p.listaErrores));
-            return;
-        }
+            scanner s = new scanner(new BufferedReader(new StringReader(texto)));
+            parser p = new parser(s);
 
-        // Paso 3: Validar si hay instrucciones
-        if (!(resultado.value instanceof LinkedList)) {
-            jTextArea2.setText("ERROR INTERNO: El parser no devolvió una lista.");
-            return;
-        }
-        
-        var ast = new Arbol((LinkedList<Instruccion>) resultado.value);
-        var tabla = new TablaSimbolos();
-        tabla.setNombre("GLOBAL");
-        ast.setConsolas("");
+            // =================== PARSE ===================
+            var resultado = p.parse();
 
-        // Lista para acumular errores semánticos
-        List<Errores> erroresSemantico = new ArrayList<>();
+            LinkedList<Errores> errores = new LinkedList<>();
+            errores.addAll(s.listaErrores);
+            errores.addAll(p.listaErrores);
 
-        for (var a : ast.getInstrucciones()) {
-            Object res = a.interpretar(ast, tabla);
-            if (res instanceof Errores) {
-                erroresSemantico.add((Errores) res);
+            if (!errores.isEmpty()) {
+                jTextArea2.setText(generarReporteErrores(errores));
+                return;
             }
-        }
 
-        // Si hay errores semánticos, mostrarlos
-        if (!erroresSemantico.isEmpty()) {
-            jTextArea2.setText(generarReporteErrores(erroresSemantico));
-            return;
-        }
-        
-        // Paso 5: Generar reportes combinados
-        String salida = ast.getConsolas();
-        List<Simbolo> simbolos = obtenerTodosLosSimbolos(tabla);
-        String reporteSimbolos = generarReporteSimbolos(simbolos);
+            if (!(resultado.value instanceof LinkedList)) {
+                jTextArea2.setText("ERROR INTERNO: El parser no devolvió instrucciones.");
+                return;
+            }
 
-        jTextArea2.setText(
-            "=== SALIDA ===\n" +
-            (salida.isEmpty() ? "(sin salida)\n" : salida + "\n") +
-            "\n=== TABLA DE SÍMBOLOS ===\n" +
-            reporteSimbolos
-        );
-        
-        } catch (Exception ex) {
-        StringWriter sw = new StringWriter();
-        ex.printStackTrace(new java.io.PrintWriter(sw));
-        jTextArea2.setText("EXCEPCIÓN:\n" + sw);
-        
+            // =================== AST y TABLA ===================
+            Arbol ast = new Arbol((LinkedList<Instruccion>) resultado.value);
+            TablaSimbolos tabla = new TablaSimbolos();
+            tabla.setNombre("GLOBAL");
+            ast.setConsolas("");
+            ast.setTablaGlobal(tabla);
+
+
+/// =================== 2️⃣ INTERPRETAR INSTRUCCIONES GLOBALES ===================
+// =================== 2️⃣ REGISTRAR FUNCIONES Y VARIABLES GLOBALES ===================
+for (var inst : ast.getInstrucciones()) {
+    if (inst == null) continue;
+    if (inst instanceof Start) continue; // Solo omitimos Start
+
+    Object res = inst.interpretar(ast, tabla);
+    if (res instanceof Errores e) {
+        errores.add(e);
     }
+}
+
+            // =================== 3️⃣ BUSCAR START ===================
+            Start start = null;
+for (var inst : ast.getInstrucciones()) {
+    if (inst instanceof Start srt) {
+        start = srt;
+        break;
+    }
+}
+
+if (start != null) {
+    // Ejecutar start SOLO si existe
+    String nombreMain = start.getId();
+    // Ahora:
+Llamada llamadaMain = new Llamada(nombreMain, start.getParametros(), 0, 0);
+    Object res = llamadaMain.interpretar(ast, tabla);
+    if (res instanceof Errores e) {
+        errores.add(e);
+    }
+}
+
+            // =================== ERRORES ===================
+            if (!errores.isEmpty()) {
+                jTextArea2.setText(generarReporteErrores(errores));
+                return;
+            }
+
+            // =================== SALIDA ===================
+             String salida = ast.getConsolas();
+        List<SimboloConEntorno> simbolos = obtenerTodosLosSimbolosConEntorno(ast);
+        String astDot = ast.generarDOT();
+
+        StringBuilder salidaFinal = new StringBuilder();
+        salidaFinal.append("=== SALIDA ===\n");
+        salidaFinal.append(salida.isEmpty() ? "(sin salida)\n" : salida + "\n");
+        salidaFinal.append("\n=== TABLA DE SÍMBOLOS ===\n");
+        salidaFinal.append(generarReporteSimbolos(simbolos));
+        generarYMostrarPNG();
+
+        jTextArea2.setText(salidaFinal.toString());
+        
+         try {
+            File dotFile = new File("ast.dot");
+            try (FileWriter fw = new FileWriter(dotFile)) {
+                fw.write(astDot);
+            }
+            jTextArea2.append("\n\nAST guardado en: " + dotFile.getAbsolutePath());
+        } catch (IOException e) {
+            jTextArea2.append("\nNo se pudo guardar el archivo AST: " + e.getMessage());
+        }
+            
+            
+
+        } catch (Exception ex) {
+            StringWriter sw = new StringWriter();
+            ex.printStackTrace(new java.io.PrintWriter(sw));
+            jTextArea2.setText("EXCEPCIÓN:\n" + sw);
+        }
+        
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jMenuItem5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem5ActionPerformed
@@ -218,6 +274,36 @@ public class Interprete extends javax.swing.JFrame {
         jTextArea1.setText("");
     }//GEN-LAST:event_jMenuItem5ActionPerformed
 
+    
+    private String valorToString(Object valor) {
+    if (valor == null) return "null";
+
+    // Listas dinámicas (java.util.List)
+    if (valor instanceof java.util.List) {
+        java.util.List<?> list = (java.util.List<?>) valor;
+        StringBuilder sb = new StringBuilder("[");
+        for (int i = 0; i < list.size(); i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(valorToString(list.get(i))); // recursivo para listas de listas
+        }
+        sb.append("]");
+        return sb.toString();
+    }
+
+    // Arreglo 1D (Object[])
+    if (valor instanceof Object[]) {
+        return java.util.Arrays.toString((Object[]) valor);
+    }
+
+    // Arreglo 2D (Object[][])
+    if (valor instanceof Object[][]) {
+        return java.util.Arrays.deepToString((Object[][]) valor);
+    }
+
+    // Valores simples: enteros, doubles, booleanos, chars, strings
+    return valor.toString();
+}
+    
     // Método para generar el reporte de errores en formato tabular
 private String generarReporteErrores(List<Errores> errores) {
     StringBuilder sb = new StringBuilder();
@@ -236,48 +322,117 @@ private String generarReporteErrores(List<Errores> errores) {
     return sb.toString();
 }
 
-// Método para recolectar todos los símbolos (incluyendo ámbitos anidados)
-private List<Simbolo> obtenerTodosLosSimbolos(TablaSimbolos tabla) {
-    List<Simbolo> simbolos = new ArrayList<>();
-    Set<String> idsVistos = new HashSet<>(); // para evitar duplicados (mantiene el más local)
+private List<SimboloConEntorno> obtenerTodosLosSimbolosConEntorno(Arbol arbol) {
+    List<SimboloConEntorno> simbolos = new ArrayList<>();
+    Set<String> idsVistos = new HashSet<>();
 
-    TablaSimbolos actual = tabla;
-    while (actual != null) {
-        // Recorremos de la tabla más local a la global
-        for (Simbolo s : actual.getTablaActual().values()) {
+    // Recorrer TODAS las tablas registradas
+    for (TablaSimbolos tabla : arbol.getTodasLasTablas()) {
+        String entorno = tabla.getNombre() != null ? tabla.getNombre() : "Global";
+        for (Simbolo s : tabla.getTablaActual().values()) {
+            // Evitar duplicados: mantener el más local (último encontrado)
             if (!idsVistos.contains(s.getId().toLowerCase())) {
-                simbolos.add(s);
+                simbolos.add(new SimboloConEntorno(s, entorno));
                 idsVistos.add(s.getId().toLowerCase());
             }
         }
-        actual = actual.getTablaAnterior();
     }
     return simbolos;
 }
 
-// Método para generar el reporte de tabla de símbolos (Fase 1)
-private String generarReporteSimbolos(List<Simbolo> simbolos) {
+// Clase auxiliar (puedes ponerla dentro de Interprete como static)
+private static class SimboloConEntorno {
+    Simbolo simbolo;
+    String entorno;
+    SimboloConEntorno(Simbolo s, String e) { simbolo = s; entorno = e; }
+}
+
+private String generarReporteSimbolos(List<SimboloConEntorno> simbolos) {
     StringBuilder sb = new StringBuilder();
-     sb.append(String.format("%-4s %-15s %-15s %-20s %-6s %-7s%n", "#", "ID", "TIPO", "VALOR", "LÍNEA", "COLUMNA"));
-    sb.append("------------------------------------------------------------------------\n");
+    sb.append(String.format("%-4s %-15s %-15s %-20s %-15s %-6s %-7s%n",
+        "#", "ID", "TIPO", "VALOR", "ENTORNO", "LÍNEA", "COLUMNA"));
+    sb.append("----------------------------------------------------------------------------------\n");
+    
     for (int i = 0; i < simbolos.size(); i++) {
-        Simbolo s = simbolos.get(i);
+        SimboloConEntorno se = simbolos.get(i);
+        Simbolo s = se.simbolo;
         String tipoStr = "desconocido";
         if (s.getTipo() != null && s.getTipo().getTipo() != null) {
-            tipoStr = s.getTipo().getTipo().name(); // Ej: ENTERO, CADENA, etc.
+            tipoStr = s.getTipo().getTipo().name();
         }
-        String valorStr = (s.getValor() != null) ? s.getValor().toString() : "null";
-        sb.append(String.format("%-4d %-15s %-15s %-20s %-6d %-7d%n",
+        String valorStr = valorToString(s.getValor());
+        if (valorStr.length() > 20) valorStr = valorStr.substring(0, 17) + "...";
+        String entorno = se.entorno;
+        String entornoFinal = "Global";
+        if (entorno != null && !entorno.equals("Global") && !entorno.equals("GLOBAL")) {
+            entornoFinal = "Local";
+        }
+
+        sb.append(String.format("%-4d %-15s %-15s %-20s %-15s %-6d %-7d%n",
             i + 1,
             s.getId(),
             tipoStr,
             valorStr,
+            entornoFinal,
             s.getLinea(),
             s.getColumna()
         ));
     }
     return sb.toString();
 }
+
+private void generarYMostrarPNG() {
+    try {
+        File dotFile = new File("ast.dot");
+        if (!dotFile.exists()) {
+            jTextArea2.append("\nNo se encontró ast.dot para generar la imagen.");
+            return;
+        }
+
+        File pngFile = new File("ast.png");
+        ProcessBuilder pb = new ProcessBuilder("dot", "-Tpng", dotFile.getAbsolutePath(), "-o", pngFile.getAbsolutePath());
+        Process process = pb.start();
+        int exitCode = process.waitFor();
+
+        if (exitCode != 0) {
+            try (var br = new BufferedReader(new InputStreamReader(process.getErrorStream()))) {
+                String err = br.lines().collect(java.util.stream.Collectors.joining("\n"));
+                jTextArea2.append("\nError Graphviz: " + err);
+            }
+            return;
+        }
+
+        if (!pngFile.exists()) {
+            jTextArea2.append("\nNo se pudo crear ast.png.");
+            return;
+        }
+
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            if (desktop.isSupported(Desktop.Action.OPEN)) {
+                desktop.open(pngFile);
+                jTextArea2.append("\nImagen AST abierta: " + pngFile.getAbsolutePath());
+            } else {
+                jTextArea2.append("\nNo se puede abrir la imagen automáticamente.");
+            }
+        } else {
+            jTextArea2.append("\nEl sistema no admite abrir archivos automáticamente.");
+        }
+
+    } catch (Exception ex) {
+        jTextArea2.append("\nError al generar/mostrar PNG: " + ex.getMessage());
+        ex.printStackTrace();
+    }
+}
+
+private void guardarASTComoDOT(String dotCode) throws IOException {
+    File dotFile = new File("ast.dot");
+    try (FileWriter fw = new FileWriter(dotFile)) {
+        fw.write(dotCode);
+    }
+    jTextArea2.append("\n\nAST guardado en: " + dotFile.getAbsolutePath());
+}
+
     /**
      * @param args the command line arguments
      */

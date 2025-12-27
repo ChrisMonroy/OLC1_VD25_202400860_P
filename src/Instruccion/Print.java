@@ -22,5 +22,13 @@ public class Print extends Instruccion{
         arbol.Print(resultado.toString());
         return null;
     }
+
+    public Instruccion getExpresion() {
+        return expresion;
+    }
+
+    public void setExpresion(Instruccion expresion) {
+        this.expresion = expresion;
+    }
     
 }

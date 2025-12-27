@@ -246,4 +246,29 @@ public Object diferente(Object comp1, Object comp2) {
                 this.linea, this.col);
         };
     }
+
+    public Instruccion getCond1() {
+        return cond1;
+    }
+
+    public void setCond1(Instruccion cond1) {
+        this.cond1 = cond1;
+    }
+
+    public Instruccion getCond2() {
+        return cond2;
+    }
+
+    public void setCond2(Instruccion cond2) {
+        this.cond2 = cond2;
+    }
+
+    public OperadoresRelacionales getRelacional() {
+        return relacional;
+    }
+
+    public void setRelacional(OperadoresRelacionales relacional) {
+        this.relacional = relacional;
+    }
+    
 }

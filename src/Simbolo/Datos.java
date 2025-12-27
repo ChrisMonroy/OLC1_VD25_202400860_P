@@ -14,5 +14,6 @@ public enum Datos {
     BOOLEANO,
     CARACTER,
     CADENA,
-    VOID
+    VOID,
+    LIST
 }

@@ -23,9 +23,8 @@ public class While extends Instruccion {
         this.expresion = expresion;
         this.instrucciones = instrucciones;
     }
-    @Override 
+
 public Object interpretar(Arbol arbol, TablaSimbolos tabla){
-    // Evaluar la condición SIEMPRE en el entorno actual (externo)
     Object condicion = this.expresion.interpretar(arbol, tabla);
     if (condicion instanceof Errores) {
         return condicion;
@@ -36,8 +35,8 @@ public Object interpretar(Arbol arbol, TablaSimbolos tabla){
     }
 
     while ((boolean) condicion) {
-        // Crear entorno nuevo SOLO para el cuerpo
         TablaSimbolos tablaWhile = new TablaSimbolos(tabla);
+        arbol.agregarTabla(tablaWhile);
 
         for (var ins : instrucciones) {
             Object resultado = ins.interpretar(arbol, tablaWhile);
@@ -46,7 +45,6 @@ public Object interpretar(Arbol arbol, TablaSimbolos tabla){
             }
         }
 
-        // Re-evaluar la condición en el ENTORNO EXTERNO (tabla), no en tablaWhile
         condicion = this.expresion.interpretar(arbol, tabla);
         if (condicion instanceof Errores) {
             return condicion;

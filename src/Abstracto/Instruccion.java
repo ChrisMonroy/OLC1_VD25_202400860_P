@@ -20,6 +20,16 @@ public abstract class Instruccion {
         this.linea = linea;
         this.col = col;
     }
+
+    public Tipo getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(Tipo tipo) {
+        this.tipo = tipo;
+    }
+    
+    
     
     public abstract Object interpretar(Arbol arbol, TablaSimbolos tabla);
 }

@@ -38,4 +38,21 @@ public class Asignacion extends Instruccion{
         variable.setValor(newValor);
         return null;
     }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public Instruccion getValor() {
+        return valor;
+    }
+
+    public void setValor(Instruccion valor) {
+        this.valor = valor;
+    }
+    
 }

@@ -2,6 +2,7 @@ package analisis;
 
 import java_cup.runtime.Symbol;
 import java.util.LinkedList;
+import java.util.HashMap;
 
 import Abstracto.Instruccion;
 import Simbolo.Tipo;
@@ -19,6 +20,13 @@ import Instruccion.Break;
 import Instruccion.Continue;
 import Instruccion.Switch;
 import Instruccion.SwitchCaso;
+import Instruccion.Incremento;
+import Instruccion.Metodo;
+import Instruccion.Start;
+import Instruccion.Llamada;
+import Instruccion.Return;
+import Instruccion.Funcion;
+import Instruccion.DeclaracionVector;
 
 import Expresiones.Nativo;
 import Expresiones.Aritmetica;
@@ -29,7 +37,19 @@ import Expresiones.Logicas;
 import Expresiones.OperadoresLogicos;
 import Expresiones.Casteo;
 import Expresiones.AccesoVar;
-import Instruccion.Incremento;
+import Expresiones.ToString;
+import Expresiones.Round;
+import Expresiones.AccesoVector;
+import Expresiones.AsignacionVector;
+import Expresiones.InicializadorVector;
+import Expresiones.AccesoVector2D;
+import Expresiones.AsignacionVector2D;
+import Expresiones.DeclaracionLista;
+import Expresiones.Remove;
+import Expresiones.Append;
+import Expresiones.Find;
+import Expresiones.Length;
+
 
 parser code {: 
   public LinkedList listaErrores = new LinkedList();
@@ -86,12 +106,27 @@ terminal PUNTO_COMA, DOS_PUNTOS;
 terminal SWITCH, CASE, DEFAULT;
 terminal ASIG;
 terminal UMINUS;
+terminal COMA, START, VOID;
+terminal ROUND, TOSTRING;
+terminal RETURN;
+terminal COR_ABRIR, COR_CERRAR;
+terminal APPEND, REMOVE;
+terminal LIST, NEW;
+terminal PUNTO;
+terminal LENGTH, FIND;
 
-// Nonterminals (with types for CUP)
+// Nonterminals
 nonterminal LinkedList INICIO, INSTRUCCIONES, LISTA_CASES, ELSEIF_LIST, DEFAULT_INST;
 nonterminal Instruccion INSTRUCCION, EXPRESION, DECLARACION, ASIGNACION, SIF, WHILE_LOOP, DO_WHILE_LOOP, FOR_LOOP, BREAK_INST, CONTINUE_INST, SWITCH_INST;
 nonterminal SwitchCaso CASE_INST;
 nonterminal Tipo TIPO;
+nonterminal LinkedList<HashMap> PARAMS;
+nonterminal Instruccion STARTT, LLAMADA;
+nonterminal LinkedList<Instruccion> PARAMSLLAMADA;
+nonterminal LinkedList<Instruccion> LISTA_EXPR;
+nonterminal Instruccion FUNCION_DECL;
+nonterminal Instruccion DECLARACIONLISTA;
+nonterminal Tipo TIPO_BASE;
 
 precedence left OR;
 precedence left AND;
@@ -102,6 +137,7 @@ precedence left MAS, MENOS;
 precedence left MULT, DIV, MODULO;
 precedence right POTENCIA;
 precedence right UMINUS;
+precedence left COR_ABRIR;
 
 start with INICIO;
 
@@ -125,7 +161,23 @@ INSTRUCCION ::= PRINT PAR_ABRIR EXPRESION:a PAR_CERRAR PUNTO_COMA {: RESULT = ne
               | IDENTIFICADOR:a INCREMENTO {: RESULT = new Incremento(a, true, aleft, aright); :}
               | IDENTIFICADOR:a DECREMENTO {: RESULT = new Incremento(a, false, aleft, aright); :}
               | IDENTIFICADOR:a INCREMENTO PUNTO_COMA {: RESULT = new Incremento(a, true, aleft, aright); :}
-              | IDENTIFICADOR:a DECREMENTO PUNTO_COMA {: RESULT = new Incremento(a, false, aleft, aright); :};
+              | IDENTIFICADOR:a DECREMENTO PUNTO_COMA {: RESULT = new Incremento(a, false, aleft, aright); :}
+              | STARTT:a {: RESULT = a; :}
+              | RETURN EXPRESION:a PUNTO_COMA {: RESULT = new Return(a, aleft, aright); :}
+              | RETURN PUNTO_COMA             {: RESULT = new Return(null, 0, 0); :}
+              | IDENTIFICADOR:a COR_ABRIR EXPRESION:b COR_CERRAR ASIG EXPRESION:c PUNTO_COMA
+              {: RESULT = new AsignacionVector(a, b, c, aleft, aright); :}
+              | IDENTIFICADOR:a COR_ABRIR EXPRESION:b COR_CERRAR COR_ABRIR EXPRESION:c COR_CERRAR ASIG EXPRESION:d PUNTO_COMA
+                {: RESULT = new AsignacionVector2D(a, b, c, d, aleft, aright); :}
+              | FUNCION_DECL:a {: RESULT = a; :}
+              | LLAMADA:a {: RESULT = a; :}
+              | IDENTIFICADOR:a PUNTO APPEND PAR_ABRIR EXPRESION:b PAR_CERRAR PUNTO_COMA
+                {: RESULT = new Append(a, b, aleft, aright); :}
+              | IDENTIFICADOR:a PUNTO REMOVE PAR_ABRIR EXPRESION:b PAR_CERRAR PUNTO_COMA
+                {: RESULT = new Remove(a, b, aleft, aright); :}
+              | DECLARACIONLISTA:a {: RESULT = a; :}
+              | DECLARACIONLISTA:a PUNTO_COMA {: RESULT = a; :}
+              ;
 
 WHILE_LOOP ::= WHILE PAR_ABRIR EXPRESION:a PAR_CERRAR LLAVE_ABRIR INSTRUCCIONES:b LLAVE_CERRAR
                {: RESULT = new While(a, b, aleft, aright); :};
@@ -159,10 +211,13 @@ BREAK_INST ::= BREAK:b PUNTO_COMA {: RESULT = new Break(bleft, bright); :};
 
 CONTINUE_INST ::= CONTINUE:c PUNTO_COMA {: RESULT = new Continue(cleft, cright); :};
 
-DECLARACION ::= VAR IDENTIFICADOR:a DOS_PUNTOS TIPO:b ASIG EXPRESION:c
-                {: RESULT = new Declaracion(a, c, b, aleft, aright); :}
-              | VAR IDENTIFICADOR:a DOS_PUNTOS TIPO:b
-                {: RESULT = new Declaracion(a, null, b, aleft, aright); :};
+DECLARACION ::=
+    VAR IDENTIFICADOR:a DOS_PUNTOS TIPO:t ASIG EXPRESION:e
+    {: RESULT = new Declaracion(a, e, t, aleft, aright); :}
+  | VAR IDENTIFICADOR:a DOS_PUNTOS TIPO:t
+    {: RESULT = new Declaracion(a, null, t, aleft, aright); :}
+;
+
 
 LISTA_CASES ::= LISTA_CASES:a CASE_INST:b {: RESULT = a; a.add(b); :}
               | CASE_INST:a {: RESULT = new LinkedList(); RESULT.add(a); :};
@@ -181,66 +236,185 @@ SWITCH_INST ::= SWITCH PAR_ABRIR EXPRESION:a PAR_CERRAR LLAVE_ABRIR LISTA_CASES:
 ASIGNACION ::= IDENTIFICADOR:a ASIG EXPRESION:b
                {: RESULT = new Asignacion(a, b, aleft, aright); :};
 
-TIPO ::= INT {: RESULT = new Tipo(Datos.ENTERO); :}
-  | DOUBLE {: RESULT = new Tipo(Datos.DECIMAL); :}
-  | BOOL {: RESULT = new Tipo(Datos.BOOLEANO); :}
-  | CHAR {: RESULT = new Tipo(Datos.CARACTER); :}
-  | STRINGTYPE {: RESULT = new Tipo(Datos.CADENA); :};
+PARAMS ::= PARAMS:a COMA TIPO_BASE:b IDENTIFICADOR:c
+           {: 
+             RESULT = a;
+             var hm2 = new HashMap<String, Object>();
+             hm2.put("id", c);
+             hm2.put("tipo", b);
+             RESULT.add(hm2);
+           :}
+         | TIPO_BASE:a IDENTIFICADOR:b
+           {: 
+             RESULT = new LinkedList<HashMap>();
+             var hm = new HashMap<String, Object>();
+             hm.put("id", b);
+             hm.put("tipo", a);  
+             RESULT.add(hm);
+           :}
+;
+
+STARTT ::= START IDENTIFICADOR:a PAR_ABRIR PAR_CERRAR PUNTO_COMA
+           {: RESULT = new Start(a, new LinkedList<>(), aleft, aright); :}
+         | START IDENTIFICADOR:a PAR_ABRIR PARAMSLLAMADA:b PAR_CERRAR PUNTO_COMA
+           {: RESULT = new Start(a, b, aleft, aright); :}
+;
+
+PARAMSLLAMADA ::= PARAMSLLAMADA:a COMA EXPRESION:b
+                  {: RESULT = a; RESULT.add(b); :}
+                | EXPRESION:a
+                  {: RESULT = new LinkedList(); RESULT.add(a); :}
+;
+
+LLAMADA ::= IDENTIFICADOR:a PAR_ABRIR PARAMSLLAMADA:b PAR_CERRAR PUNTO_COMA
+            {: RESULT = new Llamada(a, b, aleft, aright); :}
+          | IDENTIFICADOR:a PAR_ABRIR PAR_CERRAR PUNTO_COMA
+            {: RESULT = new Llamada(a, new LinkedList<>(), aleft, aright); :}
+;
+
+LISTA_EXPR ::= 
+    LISTA_EXPR:a COMA EXPRESION:b {: RESULT = a; RESULT.add(b); :}
+  | EXPRESION:a {: RESULT = new LinkedList<Instruccion>(); RESULT.add(a); :}
+  | {: RESULT = new LinkedList<Instruccion>(); :}
+;
+
+FUNCION_DECL ::= 
+    TIPO:a IDENTIFICADOR:b PAR_ABRIR PAR_CERRAR LLAVE_ABRIR INSTRUCCIONES:c LLAVE_CERRAR
+    {: 
+        RESULT = new Funcion(b, new LinkedList<HashMap>(), c, a, bleft, bright);
+    :}
+    | TIPO:a IDENTIFICADOR:b PAR_ABRIR PARAMS:p PAR_CERRAR LLAVE_ABRIR INSTRUCCIONES:c LLAVE_CERRAR
+    {: 
+        RESULT = new Funcion(b, p, c, a, bleft, bright);
+    :}
+;
+
+DECLARACIONLISTA ::= 
+    LIST MENOR TIPO_BASE:a MAYOR IDENTIFICADOR:b ASIG NEW LIST PAR_ABRIR PAR_CERRAR
+    {: 
+        Tipo tipoLista = new Tipo(Datos.LIST, 0, null, a);
+        RESULT = new DeclaracionLista(b, tipoLista, aleft, aright); 
+    :}
+;
+
+TIPO ::= TIPO_BASE:a
+         {: RESULT = a; :}
+       | TIPO_BASE:a COR_ABRIR COR_CERRAR
+         {: RESULT = new Tipo(a.getTipo(), 1); :}
+       | TIPO_BASE:a COR_ABRIR COR_CERRAR COR_ABRIR COR_CERRAR
+         {: RESULT = new Tipo(a.getTipo(), 2); :}
+;
+
+TIPO_BASE ::= INT
+              {: RESULT = new Tipo(Datos.ENTERO); :}
+            | DOUBLE
+              {: RESULT = new Tipo(Datos.DECIMAL); :}
+            | BOOL
+              {: RESULT = new Tipo(Datos.BOOLEANO); :}
+            | CHAR
+              {: RESULT = new Tipo(Datos.CARACTER); :}
+            | STRINGTYPE
+              {: RESULT = new Tipo(Datos.CADENA); :}
+            | VOID
+              {: RESULT = new Tipo(Datos.VOID); :}
+;
+
 
 // --- EXPRESSIONS ---
-EXPRESION ::= EXPRESION:a OR EXPRESION:b
-              {: RESULT = new Logicas(a, b, OperadoresLogicos.OR, aleft, aright); :}
-            | EXPRESION:a AND EXPRESION:b
-              {: RESULT = new Logicas(a, b, OperadoresLogicos.AND, aleft, aright); :}
-            | EXPRESION:a XOR EXPRESION:b
-              {: RESULT = new Logicas(a, b, OperadoresLogicos.XOR, aleft, aright); :}
-            | NOT EXPRESION:a
-              {: RESULT = new Logicas(null, a, OperadoresLogicos.NOT, aleft, aright); :}
-            | EXPRESION:a IGUAL EXPRESION:b
-              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.IGUAL, aleft, aright); :}
-            | EXPRESION:a DIFERENTE EXPRESION:b
-              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.DIFERENTE, aleft, aright); :}
-            | EXPRESION:a MENOR EXPRESION:b
-              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MENOR, aleft, aright); :}
-            | EXPRESION:a MAYOR EXPRESION:b
-              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MAYOR, aleft, aright); :}
-            | EXPRESION:a MENOR_IGUAL EXPRESION:b
-              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MENOR_IGUAL, aleft, aright); :}
-            | EXPRESION:a MAYOR_IGUAL EXPRESION:b
-              {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MAYOR_IGUAL, aleft, aright); :}
-            | EXPRESION:a MAS EXPRESION:b
-              {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.SUMA, aleft, aright); :}
-            | EXPRESION:a MENOS EXPRESION:b
-              {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.RESTA, aleft, aright); :}
-            | EXPRESION:a MULT EXPRESION:b
-              {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.MULTIPLICACION, aleft, aright); :}
-            | EXPRESION:a DIV EXPRESION:b
-              {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.DIVISION, aleft, aright); :}
-            | EXPRESION:a MODULO EXPRESION:b
-              {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.MODULO, aleft, aright); :}
-            | EXPRESION:a POTENCIA EXPRESION:b
-              {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.POTENCIA, aleft, aright); :}
-            | MENOS EXPRESION:a
-              {: RESULT = new Aritmetica(OperadoresAritmeticos.NEGACION, a, aleft, aright); :} %prec UMINUS
+EXPRESION ::= 
+    // Operadores lógicos
+    EXPRESION:a OR EXPRESION:b
+        {: RESULT = new Logicas(a, b, OperadoresLogicos.OR, aleft, aright); :}
+  | EXPRESION:a AND EXPRESION:b
+        {: RESULT = new Logicas(a, b, OperadoresLogicos.AND, aleft, aright); :}
+  | EXPRESION:a XOR EXPRESION:b
+        {: RESULT = new Logicas(a, b, OperadoresLogicos.XOR, aleft, aright); :}
+  | NOT EXPRESION:a
+        {: RESULT = new Logicas(null, a, OperadoresLogicos.NOT, aleft, aright); :}
 
-            | PAR_ABRIR TIPO:a PAR_CERRAR EXPRESION:b
-              {: RESULT = new Casteo(a.getTipo(), b, aleft, aright); :}
-            | PAR_ABRIR EXPRESION:a PAR_CERRAR
-              {: RESULT = a; :}
-            | ENTERO:a
-              {: RESULT = new Nativo(Integer.valueOf(a), new Tipo(Datos.ENTERO), aleft, aright); :}
-            | DECIMAL:a
-              {: RESULT = new Nativo(Double.valueOf(a), new Tipo(Datos.DECIMAL), aleft, aright); :}
-            | CARACTER:a
-              {: RESULT = new Nativo(a, new Tipo(Datos.CARACTER), aleft, aright); :}
-            | CADENA:a
-              {: RESULT = new Nativo(a, new Tipo(Datos.CADENA), aleft, aright); :}
-            | BOOLEANO:a
-              {: RESULT = new Nativo(a, new Tipo(Datos.BOOLEANO), aleft, aright); :}
-            | IDENTIFICADOR:a
-              {: RESULT = new AccesoVar(a, aleft, aright); :}
-            | ROUND PAR_ABRIR EXPRESION:a PAR_CERRAR
-              {: RESULT = new Round(a, aleft, aright); :}
-            | TOSTRING PAR_ABRIR EXPRESION:a PAR_CERRAR
-              {: RESULT = new ToString(a, aleft, aright); :}
-            ;
+    // Relacionales
+  | EXPRESION:a IGUAL EXPRESION:b
+        {: RESULT = new Relacionales(a, b, OperadoresRelacionales.IGUAL, aleft, aright); :}
+  | EXPRESION:a DIFERENTE EXPRESION:b
+        {: RESULT = new Relacionales(a, b, OperadoresRelacionales.DIFERENTE, aleft, aright); :}
+  | EXPRESION:a MENOR EXPRESION:b
+        {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MENOR, aleft, aright); :}
+  | EXPRESION:a MAYOR EXPRESION:b
+        {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MAYOR, aleft, aright); :}
+  | EXPRESION:a MENOR_IGUAL EXPRESION:b
+        {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MENOR_IGUAL, aleft, aright); :}
+  | EXPRESION:a MAYOR_IGUAL EXPRESION:b
+        {: RESULT = new Relacionales(a, b, OperadoresRelacionales.MAYOR_IGUAL, aleft, aright); :}
+
+    // Aritméticos
+  | EXPRESION:a MAS EXPRESION:b
+        {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.SUMA, aleft, aright); :}
+  | EXPRESION:a MENOS EXPRESION:b
+        {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.RESTA, aleft, aright); :}
+  | EXPRESION:a MULT EXPRESION:b
+        {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.MULTIPLICACION, aleft, aright); :}
+  | EXPRESION:a DIV EXPRESION:b
+        {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.DIVISION, aleft, aright); :}
+  | EXPRESION:a MODULO EXPRESION:b
+        {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.MODULO, aleft, aright); :}
+  | EXPRESION:a POTENCIA EXPRESION:b
+        {: RESULT = new Aritmetica(a, b, OperadoresAritmeticos.POTENCIA, aleft, aright); :}
+  | MENOS EXPRESION:a
+        {: RESULT = new Aritmetica(OperadoresAritmeticos.NEGACION, a, aleft, aright); :} %prec UMINUS
+
+    // Casting y paréntesis
+  | PAR_ABRIR TIPO:a PAR_CERRAR EXPRESION:b
+        {: RESULT = new Casteo(a.getTipo(), b, aleft, aright); :}
+  | PAR_ABRIR EXPRESION:a PAR_CERRAR
+        {: RESULT = a; :}
+
+    // Literales
+  | ENTERO:a
+        {: RESULT = new Nativo(Integer.valueOf(a), new Tipo(Datos.ENTERO), aleft, aright); :}
+  | DECIMAL:a
+        {: RESULT = new Nativo(Double.valueOf(a), new Tipo(Datos.DECIMAL), aleft, aright); :}
+  | CARACTER:a
+        {: RESULT = new Nativo(a, new Tipo(Datos.CARACTER), aleft, aright); :}
+  | CADENA:a
+        {: RESULT = new Nativo(a, new Tipo(Datos.CADENA), aleft, aright); :}
+  | BOOLEANO:a
+        {: RESULT = new Nativo(a, new Tipo(Datos.BOOLEANO), aleft, aright); :}
+
+    // Identificador simple
+  | IDENTIFICADOR:a
+        {: RESULT = new AccesoVar(a, aleft, aright); :}
+
+    // Funciones nativas
+  | ROUND PAR_ABRIR EXPRESION:a PAR_CERRAR
+        {: RESULT = new Round(a, null, aleft, aright); :}
+  | TOSTRING PAR_ABRIR EXPRESION:a PAR_CERRAR
+        {: RESULT = new ToString(a, null, aleft, aright); :}
+
+    // Acceso a listas/métodos
+  | LENGTH PAR_ABRIR EXPRESION:a PAR_CERRAR
+    {: RESULT = new Length(a, aleft, aright); :}
+
+  | IDENTIFICADOR:a PUNTO FIND PAR_ABRIR EXPRESION:b PAR_CERRAR
+        {: RESULT = new Find(a, b, aleft, aright); :}
+  | IDENTIFICADOR:a PUNTO APPEND PAR_ABRIR EXPRESION:b PAR_CERRAR
+        {: RESULT = new Append(a, b, aleft, aright); :}
+  | IDENTIFICADOR:a PUNTO REMOVE PAR_ABRIR EXPRESION:b PAR_CERRAR
+        {: RESULT = new Remove(a, b, aleft, aright); :}
+
+    // ✅ ACCESO A MATRICES: ¡2D ANTES QUE 1D!
+  | IDENTIFICADOR:a COR_ABRIR EXPRESION:b COR_CERRAR COR_ABRIR EXPRESION:c COR_CERRAR
+    {: RESULT = new AccesoVector2D(a, b, c, aleft, aright); :}
+
+| IDENTIFICADOR:a COR_ABRIR EXPRESION:b COR_CERRAR
+    {: RESULT = new AccesoVector(a, b, aleft, aright); :}
+
+    // Inicializador de vector (debe ir al final para no interferir)
+  | COR_ABRIR LISTA_EXPR:a COR_CERRAR
+        {: RESULT = new InicializadorVector(a, aleft, aright); :}
+
+    // Llamadas a función
+  | IDENTIFICADOR:a PAR_ABRIR PAR_CERRAR
+        {: RESULT = new Llamada(a, new LinkedList<>(), aleft, aright); :}
+  | IDENTIFICADOR:a PAR_ABRIR PARAMSLLAMADA:b PAR_CERRAR
+        {: RESULT = new Llamada(a, b, aleft, aright); :}
+;

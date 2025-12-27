@@ -1,4 +1,8 @@
-package Expresiones;
+
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */package Expresiones;
 
 import Abstracto.Instruccion;
 import Simbolo.*;
@@ -466,4 +470,38 @@ public class Aritmetica extends Instruccion {
             return resultado;
         }
     }
+
+    public Instruccion getOperando1() {
+        return operando1;
+    }
+
+    public void setOperando1(Instruccion operando1) {
+        this.operando1 = operando1;
+    }
+
+    public Instruccion getOperando2() {
+        return operando2;
+    }
+
+    public void setOperando2(Instruccion operando2) {
+        this.operando2 = operando2;
+    }
+
+    public OperadoresAritmeticos getOperaciones() {
+        return operaciones;
+    }
+
+    public void setOperaciones(OperadoresAritmeticos operaciones) {
+        this.operaciones = operaciones;
+    }
+
+    public Instruccion getOperandoUnico() {
+        return operandoUnico;
+    }
+
+    public void setOperandoUnico(Instruccion operandoUnico) {
+        this.operandoUnico = operandoUnico;
+    }
+    
+    
 }

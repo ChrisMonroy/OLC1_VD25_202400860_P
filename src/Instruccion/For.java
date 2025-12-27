@@ -31,6 +31,7 @@ public class For extends Instruccion{
     
     public Object interpretar(Arbol arbol, TablaSimbolos tabla){
         TablaSimbolos ambitoFor = new TablaSimbolos(tabla);
+        arbol.agregarTabla(ambitoFor);
         
         Object resultadoAsignacion = this.asignacion.interpretar(arbol, tabla);
         if (resultadoAsignacion instanceof Errores){

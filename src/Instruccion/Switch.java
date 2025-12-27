@@ -44,6 +44,7 @@ public class Switch extends Instruccion{
             return valorSwitch;
         }
         TablaSimbolos tablaLocal = new TablaSimbolos(tabla);
+        arbol.agregarTabla(tablaLocal);
 
         boolean encontrado = false;
         boolean ejecutando = false;
